@@ -1,0 +1,17 @@
+// 设计令牌：暗色主题，全站唯一样式来源
+:root {
+  --bg: #0f1115;
+  --bg-raised: #171a21;
+  --bg-hover: #1f242e;
+  --border: #2a303c;
+  --text: #e6e9ef;
+  --text-dim: #9aa3b2;
+  --accent: #6c8cff;
+  --accent-hover: #859fff;
+  --danger: #ff6c6c;
+  --ok: #4ade80;
+  --warn: #fbbf24;
+  --radius: 8px;
+  --sidebar-w: 220px;
+  --font: system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
+}

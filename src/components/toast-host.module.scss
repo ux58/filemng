@@ -1,0 +1,28 @@
+.host {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  min-width: 240px;
+  max-width: 420px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  text-align: left;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.ok {
+  border-left: 3px solid var(--ok);
+}
+
+.err {
+  border-left: 3px solid var(--danger);
+}

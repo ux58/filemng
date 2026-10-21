@@ -1,0 +1,172 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { apiJson, apiJsonBody } from "@/shared/api-client";
+import { formatDateTime } from "@/shared/format";
+import { SCOPES } from "@/shared/constants";
+import { toast } from "@/stores/toast";
+import styles from "./page.module.scss";
+
+interface ApiKeyItem {
+  id: string;
+  name: string;
+  keyPrefix: string;
+  scopes: string[];
+  rateLimit: number;
+  lastUsedAt: string | null;
+  expiresAt: string | null;
+  revokedAt: string | null;
+  createdAt: string;
+}
+
+export default function KeysPage() {
+  const [items, setItems] = useState<ApiKeyItem[]>([]);
+  const [name, setName] = useState("");
+  const [scopes, setScopes] = useState<string[]>(["songs:read"]);
+  const [rateLimit, setRateLimit] = useState("60");
+  const [expiresAt, setExpiresAt] = useState("");
+  const [created, setCreated] = useState<{ name: string; key: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    apiJson<{ items: ApiKeyItem[] }>("/api/keys")
+      .then((r) => setItems(r.items))
+      .catch((e) => toast.err(e.message));
+  }, []);
+
+  async function create(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const res = await apiJsonBody<ApiKeyItem & { key: string }>("POST", "/api/keys", {
+        name,
+        scopes,
+        rateLimit: Number(rateLimit) || 60,
+        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+      });
+      setCreated({ name: res.name, key: res.key });
+      setName("");
+      setExpiresAt("");
+      const r = await apiJson<{ items: ApiKeyItem[] }>("/api/keys");
+      setItems(r.items);
+    } catch (err) {
+      toast.err(err instanceof Error ? err.message : "创建失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function revoke(id: string, name: string) {
+    if (!confirm(`确定吊销「${name}」？使用该 Key 的外部调用将立即失效。`)) return;
+    try {
+      await apiJson(`/api/keys/${id}`, { method: "DELETE" });
+      setItems((prev) => prev.map((k) => (k.id === id ? { ...k, revokedAt: new Date().toISOString() } : k)));
+      toast.ok("已吊销");
+    } catch (e) {
+      toast.err(e instanceof Error ? e.message : "吊销失败");
+    }
+  }
+
+  function copyKey() {
+    if (created) navigator.clipboard.writeText(created.key).then(() => toast.ok("已复制到剪贴板"));
+  }
+
+  return (
+    <>
+      <h1 className="page-title">API Keys</h1>
+      <p className={styles.intro}>
+        供外部系统调用开放 API：请求头携带 <code>X-API-Key</code>。明文仅在创建时展示一次，服务端只存哈希。
+      </p>
+
+      <form className={styles.create} onSubmit={create}>
+        <div className="field">
+          <label htmlFor="k-name">名称 *</label>
+          <input id="k-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="如：移动端 App" required maxLength={100} />
+        </div>
+        <div className="field">
+          <label>权限范围 *</label>
+          <div className={styles.scopes}>
+            {SCOPES.map((s) => (
+              <label key={s} className={styles.scope}>
+                <input
+                  type="checkbox"
+                  checked={scopes.includes(s)}
+                  onChange={(e) =>
+                    setScopes((prev) => (e.target.checked ? [...prev, s] : prev.filter((x) => x !== s)))
+                  }
+                />
+                {s}
+              </label>
+            ))}
+          </div>
+        </div>
+        <div className="field">
+          <label htmlFor="k-rate">限流（次/分钟）</label>
+          <input id="k-rate" type="number" min={1} max={10000} value={rateLimit} onChange={(e) => setRateLimit(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="k-exp">过期时间（可选）</label>
+          <input id="k-exp" type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
+        </div>
+        <button className="btn primary" disabled={busy || scopes.length === 0}>
+          {busy ? "创建中…" : "创建 Key"}
+        </button>
+      </form>
+
+      {created && (
+        <div className={styles.reveal}>
+          <strong>请立即保存「{created.name}」的 Key（仅展示一次）：</strong>
+          <div className={styles.keyRow}>
+            <code>{created.key}</code>
+            <button className="btn" onClick={copyKey}>
+              复制
+            </button>
+            <button className="btn" onClick={() => setCreated(null)}>
+              我已保存
+            </button>
+          </div>
+        </div>
+      )}
+
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>Key 前缀</th>
+            <th>权限</th>
+            <th>限流</th>
+            <th>最近使用</th>
+            <th>过期时间</th>
+            <th>创建时间</th>
+            <th>状态</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((k) => (
+            <tr key={k.id} className={k.revokedAt ? styles.revoked : ""}>
+              <td>{k.name}</td>
+              <td>
+                <code>{k.keyPrefix}…</code>
+              </td>
+              <td>{k.scopes.join(", ")}</td>
+              <td>{k.rateLimit}/min</td>
+              <td>{formatDateTime(k.lastUsedAt)}</td>
+              <td>{formatDateTime(k.expiresAt)}</td>
+              <td>{formatDateTime(k.createdAt)}</td>
+              <td>{k.revokedAt ? "已吊销" : "有效"}</td>
+              <td>{!k.revokedAt && <button className="btn danger" onClick={() => revoke(k.id, k.name)}>吊销</button>}</td>
+            </tr>
+          ))}
+          {items.length === 0 && (
+            <tr>
+              <td colSpan={9} className={styles.empty}>
+                尚无 API Key，使用上方表单创建第一个。
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </>
+  );
+}

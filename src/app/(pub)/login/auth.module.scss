@@ -1,0 +1,30 @@
+.wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.card {
+  width: 360px;
+  padding: 32px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  h1 {
+    margin: 0 0 20px;
+    font-size: 18px;
+  }
+
+  .btn {
+    width: 100%;
+    margin-top: 6px;
+  }
+}
+
+.hint {
+  margin-top: 14px;
+  color: var(--text-dim);
+  font-size: 12px;
+  text-align: center;
+}
