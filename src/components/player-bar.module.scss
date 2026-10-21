@@ -47,3 +47,28 @@
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
 }
+
+.skip {
+  padding: 8px 12px !important;
+  font-size: 13px;
+
+  &:disabled {
+    opacity: 0.3;
+  }
+}
+
+// 移动端：隐藏元信息文本，仅留控件
+@media (max-width: 860px) {
+  .bar {
+    left: 12px;
+    right: 12px;
+    bottom: 10px;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .meta,
+  .dur {
+    display: none;
+  }
+}

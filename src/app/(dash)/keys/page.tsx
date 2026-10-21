@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { apiJson, apiJsonBody } from "@/shared/api-client";
 import { formatDateTime } from "@/shared/format";
 import { SCOPES } from "@/shared/constants";
+import { confirmDialog } from "@/components/confirm";
 import { toast } from "@/stores/toast";
 import styles from "./page.module.scss";
 
@@ -57,7 +58,7 @@ export default function KeysPage() {
   }
 
   async function revoke(id: string, name: string) {
-    if (!confirm(`确定吊销「${name}」？使用该 Key 的外部调用将立即失效。`)) return;
+    if (!(await confirmDialog({ title: `吊销「${name}」？`, message: "使用该 Key 的外部调用将立即失效。", danger: true }))) return;
     try {
       await apiJson(`/api/keys/${id}`, { method: "DELETE" });
       setItems((prev) => prev.map((k) => (k.id === id ? { ...k, revokedAt: new Date().toISOString() } : k)));

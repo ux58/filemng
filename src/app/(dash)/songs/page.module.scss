@@ -14,6 +14,17 @@
   animation: fade-up 0.4s var(--ease-out) 0.05s both;
 }
 
+@media (max-width: 860px) {
+  .filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .head .btn {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+}
+
 // ---------- 卡片网格 ----------
 .grid {
   display: grid;

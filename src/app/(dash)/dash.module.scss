@@ -62,9 +62,7 @@
 .themeIcon {
   display: inline-block;
   animation: pop-in 0.35s var(--ease-spring) both;
-}
-
-.item {
+}.item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -109,4 +107,65 @@
   margin-left: calc(var(--sidebar-w) + 8px);
   padding: 28px 32px 120px;
   max-width: 1240px;
+}
+
+// ---------- 移动端：侧边栏折叠为顶部栏 ----------
+@media (max-width: 860px) {
+  .sidebar {
+    top: 8px;
+    bottom: auto;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .brand {
+    margin-bottom: 0;
+    padding: 0;
+    font-size: 0; // 仅留 ♫ 图标
+  }
+
+  .logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+
+  .nav {
+    flex: 1;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 2px;
+    scrollbar-width: none;
+  }
+
+  .item {
+    padding: 8px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .footer {
+    flex-direction: row;
+    gap: 4px;
+
+    .btn {
+      padding: 8px 10px;
+    }
+  }
+
+  .btnText {
+    display: none; // 移动端按钮仅图标（themeIcon / aria-label 提供语义）
+  }
+
+  .main {
+    margin-left: 0;
+    padding: 74px 14px 120px;
+  }
 }

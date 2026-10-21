@@ -50,10 +50,11 @@ export function Sidebar() {
           <span className={styles.themeIcon} key={theme}>
             {theme === "dark" ? "☀" : "☾"}
           </span>
-          {theme === "dark" ? "亮色模式" : "暗色模式"}
+          <span className={styles.btnText}>{theme === "dark" ? "亮色模式" : "暗色模式"}</span>
         </button>
-        <button className="btn" onClick={logout}>
-          退出登录
+        <button className="btn" onClick={logout} aria-label="退出登录">
+          <span className={styles.themeIcon}>⏻</span>
+          <span className={styles.btnText}>退出登录</span>
         </button>
       </div>
     </aside>

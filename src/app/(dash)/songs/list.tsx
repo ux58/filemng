@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { apiJson } from "@/shared/api-client";
 import { formatDuration } from "@/shared/format";
 import { usePlayerStore } from "@/stores/player";
+import { confirmDialog } from "@/components/confirm";
 import { toast } from "@/stores/toast";
 import type { SongDto } from "@/features/songs/service";
 import styles from "./page.module.scss";
@@ -28,6 +29,7 @@ export function SongList() {
   const [data, setData] = useState<ListResult | null>(null);
   const [search, setSearch] = useState(q);
   const play = usePlayerStore((s) => s.play);
+  const items = data?.items ?? [];
 
   // URL 为唯一过滤状态源：改参数即重新拉取
   const load = useCallback(() => {
@@ -49,7 +51,7 @@ export function SongList() {
   }
 
   async function remove(id: string, title: string) {
-    if (!confirm(`确定删除「${title}」？音频与封面文件将一并删除。`)) return;
+    if (!(await confirmDialog({ title: `删除「${title}」？`, message: "音频与封面文件将一并删除，且不可恢复。", danger: true }))) return;
     try {
       await apiJson(`/api/v1/songs/${id}`, { method: "DELETE" });
       toast.ok("已删除");
@@ -84,7 +86,7 @@ export function SongList() {
       </form>
 
       <div className={styles.grid}>
-        {data?.items.map((song, i) => (
+        {items.map((song, i) => (
           <article
             key={song.id}
             className={`${styles.card} card-panel`}
@@ -93,7 +95,7 @@ export function SongList() {
             <Link href={`/songs/${song.id}`} className={styles.coverWrap} aria-label={song.title}>
               {song.cover ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img className={styles.cover} src={song.cover.url} alt="" />
+                <img className={styles.cover} src={song.cover.url} alt="" loading="lazy" />
               ) : (
                 <div className={`${styles.cover} ${styles.ph}`}>
                   <span>♪</span>
@@ -104,7 +106,7 @@ export function SongList() {
                   className={styles.playBtn}
                   onClick={(e) => {
                     e.preventDefault();
-                    play(song);
+                    play(song, items); // 带入完整列表作为播放队列
                   }}
                   title="播放"
                 >

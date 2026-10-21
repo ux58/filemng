@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { APP_NAME } from "@/shared/constants";
 import { ToastHost } from "@/components/toast-host";
 import { PlayerBar } from "@/components/player-bar";
+import { ConfirmHost } from "@/components/confirm";
 import "./globals.scss";
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         {children}
         <ToastHost />
+        <ConfirmHost />
         <PlayerBar />
       </body>
     </html>
