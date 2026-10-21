@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { getStorageForKey, type StorageRange } from "@/server/storage";
+import { getStorageForKey, parseStoredKey, type StorageRange } from "@/server/storage";
 import { jsonError } from "@/server/http";
 
 type Ctx = { params: Promise<{ key: string[] }> };
@@ -12,11 +12,12 @@ type Ctx = { params: Promise<{ key: string[] }> };
 export async function GET(req: NextRequest, ctx: Ctx) {
   try {
     const storedKey = (await ctx.params).key.join("/");
-    const adapter = await getStorageForKey(storedKey);
-    if (!adapter) return new NextResponse(null, { status: 404 });
+    const parsed = parseStoredKey(storedKey);
+    const adapter = parsed ? await getStorageForKey(storedKey) : null;
+    if (!parsed || !adapter) return new NextResponse(null, { status: 404 });
 
     const range = parseRangeHeader(req.headers.get("range"));
-    const obj = await adapter.get(storedKey, range ?? undefined);
+    const obj = await adapter.get(parsed.path, range ?? undefined); // 适配器只认剥离前缀后的路径
     if (!obj) return new NextResponse(null, { status: 404 });
 
     const headers: Record<string, string> = {
