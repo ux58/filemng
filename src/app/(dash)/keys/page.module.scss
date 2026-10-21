@@ -1,90 +1,196 @@
 .intro {
   color: var(--text-dim);
-  margin-top: -8px;
+  margin-top: -6px;
+  animation: fade-up 0.4s var(--ease-out) both;
 
   code {
     background: var(--bg-raised);
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 2px 7px;
+    border-radius: 6px;
   }
 }
 
+// 创建表单：悬浮面板
 .create {
   display: grid;
   grid-template-columns: 2fr 1.2fr 0.8fr 1fr auto;
   gap: 12px;
   align-items: end;
-  max-width: 1000px;
-  padding: 16px;
-  background: var(--bg-raised);
+  max-width: 1020px;
+  padding: 18px;
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 18px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 22px;
+  animation: fade-up 0.4s var(--ease-out) 0.05s both;
 }
 
 .scopes {
   display: flex;
-  gap: 14px;
+  gap: 12px;
 }
 
 .scope {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
   cursor: pointer;
+  font-size: 13px;
+  transition: all var(--dur-fast) var(--ease-spring);
+
+  &:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
 
   input {
     width: auto;
+    accent-color: var(--accent);
+  }
+
+  &:has(input:checked) {
+    background: var(--grad-accent-soft);
+    border-color: var(--accent);
+    color: var(--text);
   }
 }
 
-.reveal {
-  padding: 16px;
-  margin-bottom: 18px;
-  border: 1px solid var(--warn);
-  border-radius: var(--radius);
-  background: rgba(251, 191, 36, 0.06);
+// ---------- 明文 Key 悬浮模态 ----------
+.modalMask {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  background: rgba(5, 6, 10, 0.6);
+  backdrop-filter: blur(6px);
+  animation: fade-up 0.2s var(--ease-out) both;
 }
 
-.keyRow {
+.modal {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-
-  code {
-    flex: 1;
-    padding: 8px 12px;
-    background: var(--bg);
-    border-radius: var(--radius);
-    word-break: break-all;
-  }
+  flex-direction: column;
+  gap: 12px;
+  width: min(520px, calc(100vw - 40px));
+  padding: 30px 28px;
+  background: var(--bg-card);
+  border: 1px solid var(--warn);
+  border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(251, 191, 36, 0.12);
+  animation: pop-in 0.35s var(--ease-spring) both;
 }
 
+.modalBadge {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--grad-accent);
+  color: #fff;
+  font-size: 20px;
+  box-shadow: 0 6px 18px rgba(139, 123, 255, 0.45);
+}
+
+.modalHint {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin: 0;
+}
+
+.keyText {
+  padding: 13px 16px;
+  background: var(--bg);
+  border: 1px dashed var(--warn);
+  border-radius: 12px;
+  word-break: break-all;
+  font-size: 14px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+// ---------- Key 表格 ----------
 .table {
   width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 10px 12px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
+  border-collapse: separate;
+  border-spacing: 0 8px;
 
   th {
-    color: var(--text-dim);
+    padding: 0 14px 4px;
+    text-align: left;
+    color: var(--text-faint);
     font-size: 12px;
     font-weight: 500;
   }
+
+  td {
+    padding: 12px 14px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    animation: fade-up 0.4s var(--ease-out) both;
+  }
+
+  td:first-child {
+    border-left: 1px solid var(--border);
+    border-radius: 12px 0 0 12px;
+  }
+
+  td:last-child {
+    border-right: 1px solid var(--border);
+    border-radius: 0 12px 12px 0;
+  }
+
+  tbody tr {
+    transition: transform var(--dur-fast) var(--ease-out);
+
+    &:hover td {
+      background: var(--bg-hover);
+      border-color: var(--border-strong);
+    }
+  }
+
+  code {
+    background: var(--bg);
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+}
+
+.badgeActive,
+.badgeRevoked {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.badgeActive {
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--ok);
+}
+
+.badgeRevoked {
+  background: rgba(255, 108, 138, 0.12);
+  color: var(--danger);
 }
 
 .revoked {
-  opacity: 0.45;
+  opacity: 0.5;
 }
 
 .empty {
   text-align: center;
   color: var(--text-dim);
-  padding: 32px 0;
+  padding: 36px 0;
 }

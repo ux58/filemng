@@ -58,7 +58,9 @@ export default function SetupPage() {
   return (
     <main className={styles.wrap}>
       <form className={styles.card} onSubmit={submit}>
+        <div className={styles.badge}>♫</div>
         <h1>初始化管理员</h1>
+        <p className={styles.hint}>首次运行：创建管理员账号后即可开始管理音乐库。</p>
         <div className="field">
           <label htmlFor="username">用户名（≥3 位）</label>
           <input id="username" value={username} onChange={(e) => setUsername(e.target.value)} minLength={3} autoFocus required />

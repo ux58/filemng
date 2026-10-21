@@ -1,29 +1,53 @@
 .detail {
-  max-width: 860px;
+  max-width: 880px;
+  animation: fade-up 0.45s var(--ease-out) both;
 }
 
 .head {
   display: flex;
-  gap: 24px;
-  margin-bottom: 24px;
+  gap: 28px;
+  padding: 24px;
+  margin-bottom: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--dur), border-color var(--dur);
+
+  &:hover {
+    border-color: var(--border-strong);
+  }
 }
 
 .cover {
-  width: 160px;
-  height: 160px;
-  border-radius: 12px;
+  width: 172px;
+  height: 172px;
+  border-radius: 16px;
   object-fit: cover;
   flex-shrink: 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  animation: pop-in 0.5s var(--ease-spring) both;
 }
 
 .ph {
-  background: var(--bg-raised);
-  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  background: var(--grad-accent-soft);
+  color: var(--accent);
+  font-size: 56px;
+}
+
+.title {
+  font-size: 26px;
+  background: var(--grad-accent-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .sub {
   color: var(--text-dim);
-  margin: 0 0 14px;
+  margin: 2px 0 18px;
 }
 
 .actions {
@@ -34,32 +58,44 @@
 .meta {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 16px;
-  background: var(--bg-raised);
+  gap: 14px;
+  padding: 18px;
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 24px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  animation: fade-up 0.45s var(--ease-out) 0.08s both;
 
   div {
     display: flex;
     flex-direction: column;
     font-variant-numeric: tabular-nums;
+    transition: color var(--dur-fast);
 
     span {
       color: var(--text-dim);
       font-size: 12px;
     }
+
+    &:hover span {
+      color: var(--accent);
+    }
   }
 }
 
 .section {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  padding: 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  animation: fade-up 0.45s var(--ease-out) 0.14s both;
 
   h2 {
-    font-size: 15px;
+    font-size: 14px;
     color: var(--text-dim);
-    margin: 0 0 8px;
+    margin: 0 0 10px;
+    letter-spacing: 0.04em;
   }
 }
 
@@ -67,12 +103,9 @@
   white-space: pre-wrap;
   font: inherit;
   margin: 0;
-  padding: 16px;
-  background: var(--bg-raised);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  color: var(--text);
 }
 
 .dim {
-  color: var(--text-dim);
+  color: var(--text-faint);
 }

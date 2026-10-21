@@ -114,16 +114,20 @@ export default function KeysPage() {
       </form>
 
       {created && (
-        <div className={styles.reveal}>
-          <strong>请立即保存「{created.name}」的 Key（仅展示一次）：</strong>
-          <div className={styles.keyRow}>
-            <code>{created.key}</code>
-            <button className="btn" onClick={copyKey}>
-              复制
-            </button>
-            <button className="btn" onClick={() => setCreated(null)}>
-              我已保存
-            </button>
+        <div className={styles.modalMask} onClick={() => setCreated(null)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalBadge}>⚿</div>
+            <strong>请立即保存「{created.name}」的 Key</strong>
+            <p className={styles.modalHint}>明文仅展示这一次，关闭后无法再次查看（服务端只存哈希）。</p>
+            <code className={styles.keyText}>{created.key}</code>
+            <div className={styles.modalActions}>
+              <button className="btn primary" onClick={copyKey}>
+                复制到剪贴板
+              </button>
+              <button className="btn" onClick={() => setCreated(null)}>
+                我已保存
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -137,14 +141,13 @@ export default function KeysPage() {
             <th>限流</th>
             <th>最近使用</th>
             <th>过期时间</th>
-            <th>创建时间</th>
             <th>状态</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {items.map((k) => (
-            <tr key={k.id} className={k.revokedAt ? styles.revoked : ""}>
+          {items.map((k, i) => (
+            <tr key={k.id} className={k.revokedAt ? styles.revoked : ""} style={{ animationDelay: `${i * 0.04}s` }}>
               <td>{k.name}</td>
               <td>
                 <code>{k.keyPrefix}…</code>
@@ -153,8 +156,7 @@ export default function KeysPage() {
               <td>{k.rateLimit}/min</td>
               <td>{formatDateTime(k.lastUsedAt)}</td>
               <td>{formatDateTime(k.expiresAt)}</td>
-              <td>{formatDateTime(k.createdAt)}</td>
-              <td>{k.revokedAt ? "已吊销" : "有效"}</td>
+              <td>{k.revokedAt ? <span className={styles.badgeRevoked}>已吊销</span> : <span className={styles.badgeActive}>有效</span>}</td>
               <td>{!k.revokedAt && <button className="btn danger" onClick={() => revoke(k.id, k.name)}>吊销</button>}</td>
             </tr>
           ))}

@@ -28,7 +28,9 @@ export function LoginForm() {
   return (
     <main className={styles.wrap}>
       <form className={styles.card} onSubmit={submit}>
-        <h1>登录</h1>
+        <div className={styles.badge}>♫</div>
+        <h1>欢迎回来</h1>
+        <p className={styles.sub}>登录 FileMng 音乐库管理你的音乐</p>
         <div className="field">
           <label htmlFor="username">用户名</label>
           <input id="username" value={username} onChange={(e) => setUsername(e.target.value)} autoFocus required />

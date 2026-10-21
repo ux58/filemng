@@ -1,5 +1,11 @@
 .form {
-  max-width: 860px;
+  max-width: 900px;
+  padding: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  animation: fade-up 0.45s var(--ease-out) both;
 }
 
 .grid {

@@ -1,17 +1,41 @@
-// 设计令牌：暗色主题，全站唯一样式来源
+// 设计令牌 v2：活泼暗色系 · 渐变主色 · 辉光阴影 · 动效变量
 :root {
-  --bg: #0f1115;
-  --bg-raised: #171a21;
-  --bg-hover: #1f242e;
-  --border: #2a303c;
-  --text: #e6e9ef;
-  --text-dim: #9aa3b2;
-  --accent: #6c8cff;
-  --accent-hover: #859fff;
-  --danger: #ff6c6c;
+  --bg: #0b0d14;
+  --bg-raised: rgba(255, 255, 255, 0.04);
+  --bg-card: #151827;
+  --bg-hover: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #eef1f8;
+  --text-dim: #9aa3b8;
+  --text-faint: #6b7288;
+
+  --accent: #8b7bff;
+  --accent-2: #ff7bc0;
+  --accent-3: #4dd6ff;
+  --grad-accent: linear-gradient(135deg, #8b7bff 0%, #ff7bc0 100%);
+  --grad-accent-soft: linear-gradient(135deg, rgba(139, 123, 255, 0.16), rgba(255, 123, 192, 0.16));
+  --grad-accent-text: linear-gradient(135deg, #a99bff, #ff9ccf);
+
   --ok: #4ade80;
   --warn: #fbbf24;
-  --radius: 8px;
-  --sidebar-w: 220px;
+  --danger: #ff6c8a;
+
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 8px 32px rgba(139, 123, 255, 0.22);
+
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+
+  --sidebar-w: 232px;
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); // 弹性
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 0.18s;
+  --dur: 0.3s;
+
   --font: system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
 }

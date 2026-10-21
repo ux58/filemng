@@ -83,62 +83,64 @@ export function SongList() {
         <button className="btn">搜索</button>
       </form>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th className={styles.wCover}>封面</th>
-            <th>标题</th>
-            <th>艺术家</th>
-            <th>专辑</th>
-            <th>流派</th>
-            <th>年份</th>
-            <th className={styles.wDur}>时长</th>
-            <th className={styles.wOps}>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data?.items.map((song) => (
-            <tr key={song.id}>
-              <td>
-                {song.cover ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img className={styles.cover} src={song.cover.url} alt="" />
-                ) : (
-                  <div className={`${styles.cover} ${styles.ph}`} />
-                )}
-              </td>
-              <td>
-                <Link href={`/songs/${song.id}`}>{song.title}</Link>
-              </td>
-              <td>{song.artist ?? "-"}</td>
-              <td>{song.album ?? "-"}</td>
-              <td>{song.genre ?? "-"}</td>
-              <td>{song.year ?? "-"}</td>
-              <td>{formatDuration(song.durationSec)}</td>
-              <td className={styles.ops}>
-                {song.audio && (
-                  <button className="btn" onClick={() => play(song)} title="播放">
-                    ▶
-                  </button>
-                )}
+      <div className={styles.grid}>
+        {data?.items.map((song, i) => (
+          <article
+            key={song.id}
+            className={`${styles.card} card-panel`}
+            style={{ animationDelay: `${i * 0.05}s` }}
+          >
+            <Link href={`/songs/${song.id}`} className={styles.coverWrap} aria-label={song.title}>
+              {song.cover ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img className={styles.cover} src={song.cover.url} alt="" />
+              ) : (
+                <div className={`${styles.cover} ${styles.ph}`}>
+                  <span>♪</span>
+                </div>
+              )}
+              {song.audio && (
+                <button
+                  className={styles.playBtn}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    play(song);
+                  }}
+                  title="播放"
+                >
+                  ▶
+                </button>
+              )}
+              {song.durationSec != null && <span className={styles.dur}>{formatDuration(song.durationSec)}</span>}
+            </Link>
+            <div className={styles.body}>
+              <Link href={`/songs/${song.id}`} className={styles.title}>
+                {song.title}
+              </Link>
+              <span className={styles.artist}>{song.artist ?? "未知艺术家"}</span>
+              <div className={styles.tags}>
+                {song.album && <span className={styles.tag}>{song.album}</span>}
+                {song.genre && <span className={`${styles.tag} ${styles.tagAccent}`}>{song.genre}</span>}
+                {song.year && <span className={styles.tag}>{song.year}</span>}
+              </div>
+              <div className={styles.ops}>
                 <Link className="btn" href={`/songs/${song.id}/edit`}>
                   编辑
                 </Link>
                 <button className="btn danger" onClick={() => remove(song.id, song.title)}>
                   删除
                 </button>
-              </td>
-            </tr>
-          ))}
-          {data && data.items.length === 0 && (
-            <tr>
-              <td colSpan={8} className={styles.empty}>
-                暂无歌曲，点击右上角「上传歌曲」开始。
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+              </div>
+            </div>
+          </article>
+        ))}
+        {data && data.items.length === 0 && (
+          <div className={`${styles.empty} card-panel`}>
+            <span className={styles.emptyIcon}>♪</span>
+            暂无歌曲，点击右上角「上传歌曲」开始。
+          </div>
+        )}
+      </div>
 
       {pages > 1 && (
         <div className={styles.pager}>
