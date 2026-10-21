@@ -1,15 +1,17 @@
 // 设计令牌 v2：活泼暗色系（默认）+ 亮色主题 · 渐变主色 · 辉光阴影 · 动效变量
 :root {
+  color-scheme: dark; // 原生控件（滚动条/文件选择/日期）跟随暗色
   --bg: #0b0d14;
   --bg-raised: rgba(255, 255, 255, 0.04);
+  --input-bg: #12141f; // 输入框实底：暗色下与卡片保持可辨对比
   --bg-card: #151827;
   --bg-hover: rgba(255, 255, 255, 0.08);
   --border: rgba(255, 255, 255, 0.09);
   --border-strong: rgba(255, 255, 255, 0.16);
 
   --text: #eef1f8;
-  --text-dim: #9aa3b8;
-  --text-faint: #6b7288;
+  --text-dim: #a3acc2;
+  --text-faint: #767e94;
 
   --accent: #8b7bff;
   --accent-2: #ff7bc0;
@@ -52,16 +54,18 @@
 
 // ---------- 亮色主题 ----------
 [data-theme="light"] {
+  color-scheme: light;
   --bg: #f2f3f9;
   --bg-raised: rgba(20, 24, 40, 0.04);
+  --input-bg: #ffffff;
   --bg-card: #ffffff;
   --bg-hover: rgba(20, 24, 40, 0.07);
-  --border: rgba(20, 24, 40, 0.1);
-  --border-strong: rgba(20, 24, 40, 0.2);
+  --border: rgba(20, 24, 40, 0.12);
+  --border-strong: rgba(20, 24, 40, 0.22);
 
   --text: #1d2130;
-  --text-dim: #59607a;
-  --text-faint: #8f96ab;
+  --text-dim: #4c536b;
+  --text-faint: #6f768c;
 
   --grad-accent-text: linear-gradient(135deg, #6c58e8, #d84f9e);
 
