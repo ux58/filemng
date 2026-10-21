@@ -7,12 +7,13 @@
   display: flex;
   flex-direction: column;
   padding: 22px 14px;
-  background: rgba(21, 24, 39, 0.82);
+  background: var(--glass);
   backdrop-filter: blur(18px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   z-index: 100;
+  transition: background var(--dur), border-color var(--dur);
 }
 
 .brand {
@@ -46,6 +47,21 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .btn {
+    justify-content: flex-start;
+  }
+}
+
+.themeIcon {
+  display: inline-block;
+  animation: pop-in 0.35s var(--ease-spring) both;
 }
 
 .item {

@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { APP_NAME } from "@/shared/constants";
+import { useThemeStore } from "@/stores/theme";
 import styles from "./dash.module.scss";
 
 const NAV = [
@@ -15,6 +17,9 @@ const NAV = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { theme, init, toggle } = useThemeStore();
+
+  useEffect(init, [init]);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -40,9 +45,17 @@ export function Sidebar() {
           </Link>
         ))}
       </nav>
-      <button className="btn" onClick={logout}>
-        退出登录
-      </button>
+      <div className={styles.footer}>
+        <button className="btn" onClick={toggle} title={theme === "dark" ? "切换到亮色模式" : "切换到暗色模式"} aria-label="切换主题">
+          <span className={styles.themeIcon} key={theme}>
+            {theme === "dark" ? "☀" : "☾"}
+          </span>
+          {theme === "dark" ? "亮色模式" : "暗色模式"}
+        </button>
+        <button className="btn" onClick={logout}>
+          退出登录
+        </button>
+      </div>
     </aside>
   );
 }

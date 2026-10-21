@@ -1,4 +1,4 @@
-// 设计令牌 v2：活泼暗色系 · 渐变主色 · 辉光阴影 · 动效变量
+// 设计令牌 v2：活泼暗色系（默认）+ 亮色主题 · 渐变主色 · 辉光阴影 · 动效变量
 :root {
   --bg: #0b0d14;
   --bg-raised: rgba(255, 255, 255, 0.04);
@@ -26,6 +26,16 @@
   --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.35);
   --shadow-glow: 0 8px 32px rgba(139, 123, 255, 0.22);
 
+  // 玻璃拟态面板与遮罩（主题相关）
+  --glass: rgba(21, 24, 39, 0.82);
+  --glass-strong: rgba(21, 24, 39, 0.92);
+  --mask: rgba(5, 6, 10, 0.6);
+
+  // 背景径向辉光
+  --glow-1: rgba(139, 123, 255, 0.14);
+  --glow-2: rgba(255, 123, 192, 0.1);
+  --glow-3: rgba(77, 214, 255, 0.07);
+
   --radius-sm: 8px;
   --radius: 14px;
   --radius-lg: 20px;
@@ -38,4 +48,36 @@
   --dur: 0.3s;
 
   --font: system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+
+// ---------- 亮色主题 ----------
+[data-theme="light"] {
+  --bg: #f2f3f9;
+  --bg-raised: rgba(20, 24, 40, 0.04);
+  --bg-card: #ffffff;
+  --bg-hover: rgba(20, 24, 40, 0.07);
+  --border: rgba(20, 24, 40, 0.1);
+  --border-strong: rgba(20, 24, 40, 0.2);
+
+  --text: #1d2130;
+  --text-dim: #59607a;
+  --text-faint: #8f96ab;
+
+  --grad-accent-text: linear-gradient(135deg, #6c58e8, #d84f9e);
+
+  --ok: #16a34a;
+  --warn: #b45309;
+  --danger: #e04467;
+
+  --shadow-sm: 0 2px 10px rgba(30, 35, 60, 0.08);
+  --shadow-md: 0 8px 28px rgba(30, 35, 60, 0.12);
+  --shadow-glow: 0 8px 32px rgba(139, 123, 255, 0.3);
+
+  --glass: rgba(255, 255, 255, 0.78);
+  --glass-strong: rgba(255, 255, 255, 0.9);
+  --mask: rgba(30, 35, 60, 0.35);
+
+  --glow-1: rgba(139, 123, 255, 0.12);
+  --glow-2: rgba(255, 123, 192, 0.1);
+  --glow-3: rgba(77, 214, 255, 0.08);
 }
