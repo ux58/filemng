@@ -65,6 +65,7 @@ export function Sidebar() {
             style={{ animationDelay: `${0.05 + i * 0.06}s` }}
             className={`${styles.item} ${pathname.startsWith(item.href) ? styles.active : ""}`}
             aria-current={pathname.startsWith(item.href) ? "page" : undefined}
+            transitionTypes={["nav-forward"]}
           >
             <span className={styles.icon}>
               <item.Icon size={15} strokeWidth={2.2} />

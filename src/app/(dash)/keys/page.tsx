@@ -121,7 +121,18 @@ export default function KeysPage() {
         </div>
         <div className="field">
           <label htmlFor="k-rate">限流（次/分钟）</label>
-          <input id="k-rate" type="number" min={1} max={10000} value={rateLimit} onChange={(e) => setRateLimit(e.target.value)} />
+          <input
+            id="k-rate"
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={10000}
+            value={rateLimit}
+            onChange={(e) => {
+              const n = e.target.value.replace(/\D/g, "").slice(0, 5);
+              setRateLimit(n);
+            }}
+          />
         </div>
         <div className="field">
           <label htmlFor="k-exp">过期时间（可选）</label>

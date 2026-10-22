@@ -68,7 +68,7 @@ export function SongList() {
     <>
       <div className={styles.head}>
         <h1 className="page-title">歌曲库{data ? `（${data.total}）` : ""}</h1>
-        <Link className="btn primary" href="/songs/new">
+        <Link className="btn primary" href="/songs/new" transitionTypes={["nav-forward"]}>
           + 上传歌曲
         </Link>
       </div>
@@ -82,7 +82,19 @@ export function SongList() {
       >
         <input placeholder="搜索标题 / 艺术家 / 专辑…" value={search} onChange={(e) => setSearch(e.target.value)} />
         <input placeholder="流派" defaultValue={genre} onBlur={(e) => applyFilter({ genre: e.target.value, page: 1 })} />
-        <input placeholder="年份" type="number" defaultValue={year} onBlur={(e) => applyFilter({ year: e.target.value, page: 1 })} />
+        <input
+          placeholder="年份"
+          type="number"
+          inputMode="numeric"
+          min={1000}
+          max={3000}
+          step={1}
+          defaultValue={year}
+          onBlur={(e) => {
+            e.target.value = e.target.value.replace(/\D/g, "").slice(0, 4);
+            applyFilter({ year: e.target.value, page: 1 });
+          }}
+        />
         <button className="btn">搜索</button>
       </form>
 
@@ -93,7 +105,7 @@ export function SongList() {
             className={`${styles.card} card-panel`}
             style={{ animationDelay: `${i * 0.05}s` }}
           >
-            <Link href={`/songs/${song.id}`} className={styles.coverWrap} aria-label={song.title}>
+            <Link href={`/songs/${song.id}`} className={styles.coverWrap} aria-label={song.title} transitionTypes={["nav-forward"]}>
               {song.cover ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img className={styles.cover} src={song.cover.url} alt="" loading="lazy" />
@@ -117,7 +129,7 @@ export function SongList() {
               {song.durationSec != null && <span className={styles.dur}>{formatDuration(song.durationSec)}</span>}
             </Link>
             <div className={styles.body}>
-              <Link href={`/songs/${song.id}`} className={styles.title}>
+              <Link href={`/songs/${song.id}`} className={styles.title} transitionTypes={["nav-forward"]}>
                 {song.title}
               </Link>
               <span className={styles.artist}>{song.artist ?? "未知艺术家"}</span>
@@ -127,7 +139,7 @@ export function SongList() {
                 {song.year && <span className={styles.tag}>{song.year}</span>}
               </div>
               <div className={styles.ops}>
-                <Link className="btn" href={`/songs/${song.id}/edit`}>
+                <Link className="btn" href={`/songs/${song.id}/edit`} transitionTypes={["nav-forward"]}>
                   编辑
                 </Link>
                 <button className="btn danger" onClick={() => remove(song.id, song.title)}>

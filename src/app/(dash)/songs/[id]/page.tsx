@@ -49,7 +49,7 @@ export default function SongDetailPage() {
                 <Play size={14} strokeWidth={2.4} style={{marginRight:6}} />播放
               </button>
             )}
-            <Link className="btn" href={`/songs/${song.id}/edit`}>
+            <Link className="btn" href={`/songs/${song.id}/edit`} transitionTypes={["nav-forward"]}>
               编辑
             </Link>
             <BackButton />

@@ -118,7 +118,11 @@ export default function SettingsPage() {
               type="number"
               min={1}
               value={Math.round(s.upload.audioMaxBytes / 1024 / 1024)}
-              onChange={(e) => patch((d) => (d.upload.audioMaxBytes = Number(e.target.value) * 1024 * 1024))}
+              onChange={(e) => {
+                const mb = Number(e.target.value);
+                if (!Number.isFinite(mb) || mb < 1) return; // 拒绝非法/非正值
+                patch((d) => (d.upload.audioMaxBytes = mb * 1024 * 1024));
+              }}
             />
           </div>
           <div className="field">
@@ -128,7 +132,11 @@ export default function SettingsPage() {
               type="number"
               min={1}
               value={Math.round(s.upload.imageMaxBytes / 1024 / 1024)}
-              onChange={(e) => patch((d) => (d.upload.imageMaxBytes = Number(e.target.value) * 1024 * 1024))}
+              onChange={(e) => {
+                const mb = Number(e.target.value);
+                if (!Number.isFinite(mb) || mb < 1) return;
+                patch((d) => (d.upload.imageMaxBytes = mb * 1024 * 1024));
+              }}
             />
           </div>
         </div>

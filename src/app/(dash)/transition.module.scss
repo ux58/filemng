@@ -1,20 +1,9 @@
-// 内容画布：转场动画 + 居中限宽 + 内边距（padding 在此处统一管理）
+// 内容画布：居中限宽 + 内边距（padding 在此处统一管理）。
+// 页面进入/退出动画由 template.tsx 的 ViewTransition 接管，此处不再叠加 CSS 动画。
 .enter {
   max-width: 1120px;
   margin: 0 auto;
   padding: 22px 30px 110px;
-  animation: page-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes page-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @media (max-width: 860px) {

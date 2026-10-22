@@ -56,6 +56,10 @@ export function SongForm({ song }: { song?: SongDto }) {
   const set = (k: keyof SongFormValue) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setV((prev) => ({ ...prev, [k]: e.target.value }));
 
+  // 非负整数字段：仅放行数字，杜绝负号/小数点/科学计数法进入表单态
+  const setNum = (k: keyof SongFormValue) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setV((prev) => ({ ...prev, [k]: e.target.value.replace(/\D/g, "").slice(0, 5) }));
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -64,7 +68,7 @@ export function SongForm({ song }: { song?: SongDto }) {
         ? await apiUpload<SongDto>("PATCH", `/api/v1/songs/${song.id}`, toPayload(v), { audio, cover })
         : await apiUpload<SongDto>("POST", "/api/v1/songs", toPayload(v), { audio, cover });
       toast.ok(song ? "已保存" : "已创建");
-      router.push(`/songs/${saved.id}`);
+      router.push(`/songs/${saved.id}`, { transitionTypes: ["nav-forward"] });
       router.refresh();
     } catch (err) {
       toast.err(err instanceof Error ? err.message : "保存失败");
@@ -93,15 +97,15 @@ export function SongForm({ song }: { song?: SongDto }) {
         </div>
         <div className="field">
           <label htmlFor="f-year">年份</label>
-          <input id="f-year" type="number" min={1000} max={3000} value={v.year} onChange={set("year")} />
+          <input id="f-year" type="number" inputMode="numeric" min={1000} max={3000} value={v.year} onChange={setNum("year")} />
         </div>
         <div className="field">
           <label htmlFor="f-track">音轨号</label>
-          <input id="f-track" type="number" min={0} max={999} value={v.trackNo} onChange={set("trackNo")} />
+          <input id="f-track" type="number" inputMode="numeric" min={0} max={999} value={v.trackNo} onChange={setNum("trackNo")} />
         </div>
         <div className="field">
           <label htmlFor="f-dur">时长（秒，上传音频后可自动解析）</label>
-          <input id="f-dur" type="number" min={0} max={86400} value={v.durationSec} onChange={set("durationSec")} />
+          <input id="f-dur" type="number" inputMode="numeric" min={0} max={86400} value={v.durationSec} onChange={setNum("durationSec")} />
         </div>
         <div className="field">
           <label htmlFor="f-audio">音频文件（mp3/ogg/wav/flac/m4a）</label>
