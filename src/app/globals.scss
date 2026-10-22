@@ -7,23 +7,17 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse 60% 45% at 12% -8%, var(--glow-1), transparent),
-    radial-gradient(ellipse 50% 40% at 95% 0%, var(--glow-2), transparent),
-    radial-gradient(ellipse 45% 40% at 50% 110%, var(--glow-3), transparent),
-    var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font);
   font-size: 14px;
-  line-height: 1.6;
-  // 字体渲染清晰度：亚像素抗锯齿 + 关闭合成字体加粗
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-// 主题切换瞬间：禁用所有过渡，避免大面积颜色过渡造成卡顿感
+// 主题切换瞬间：禁用所有过渡，避免大面积重绘的卡顿感
 html.theme-switching *,
 html.theme-switching *::before,
 html.theme-switching *::after {
@@ -36,25 +30,25 @@ a {
   transition: color var(--dur-fast);
 
   &:hover {
-    color: var(--accent-2);
+    color: var(--accent-hover);
   }
 }
 
 ::selection {
-  background: rgba(139, 123, 255, 0.35);
+  background: rgba(76, 141, 255, 0.3);
 }
 
 input,
 select,
 textarea {
   width: 100%;
-  padding: 9px 12px;
+  padding: 7px 10px;
   background: var(--input-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text);
   font: inherit;
-  transition: border-color var(--dur-fast), box-shadow var(--dur-fast), background var(--dur-fast);
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
 
   &::placeholder {
     color: var(--text-faint);
@@ -67,21 +61,21 @@ textarea {
   &:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(139, 123, 255, 0.18);
+    box-shadow: 0 0 0 2px var(--accent-soft);
   }
 }
 
 textarea {
   resize: vertical;
-  min-height: 90px;
+  min-height: 80px;
 }
 
 // 原生文件选择按钮：跟随主题（color-scheme 在部分引擎下不覆盖它）
 input[type="file"]::file-selector-button {
-  padding: 7px 14px;
-  margin-right: 10px;
+  padding: 5px 12px;
+  margin-right: 8px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--bg-hover);
   color: var(--text);
   font: inherit;
@@ -91,7 +85,7 @@ input[type="file"]::file-selector-button {
 
 input[type="file"]::file-selector-button:hover {
   border-color: var(--accent);
-  background: var(--grad-accent-soft);
+  background: var(--accent-soft);
 }
 
 // 滚动条：主题化细样式
@@ -120,31 +114,26 @@ button {
   cursor: pointer;
 }
 
-// ---------- 通用按钮：渐变主按钮 / 玻璃次按钮 / 危险描边 ----------
+// ---------- 按钮：克制的主/次/危险 ----------
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 9px 18px;
+  padding: 6px 14px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--bg-raised);
   color: var(--text);
-  transition:
-    transform var(--dur-fast) var(--ease-spring),
-    box-shadow var(--dur-fast),
-    background var(--dur-fast),
-    border-color var(--dur-fast);
+  transition: background var(--dur-fast), border-color var(--dur-fast), box-shadow var(--dur-fast);
 
   &:hover:not(:disabled) {
     background: var(--bg-hover);
     border-color: var(--border-strong);
-    transform: translateY(-1px);
   }
 
   &:active:not(:disabled) {
-    transform: translateY(0) scale(0.97);
+    transform: translateY(0.5px);
   }
 
   &:disabled {
@@ -153,25 +142,24 @@ button {
   }
 
   &.primary {
-    background: var(--grad-accent);
-    border-color: transparent;
+    background: var(--accent);
+    border-color: var(--accent);
     color: #fff;
-    box-shadow: 0 4px 16px rgba(139, 123, 255, 0.35);
 
     &:hover:not(:disabled) {
-      box-shadow: var(--shadow-glow);
-      transform: translateY(-2px);
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
     }
   }
 
   &.danger {
     color: var(--danger);
-    border-color: rgba(255, 108, 138, 0.4);
+    border-color: transparent;
     background: transparent;
 
     &:hover:not(:disabled) {
-      background: rgba(255, 108, 138, 0.1);
-      box-shadow: 0 4px 14px rgba(255, 108, 138, 0.2);
+      background: rgba(224, 92, 114, 0.08);
+      border-color: var(--danger);
     }
   }
 }
@@ -179,42 +167,46 @@ button {
 .field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin-bottom: 14px;
+  gap: 4px;
+  margin-bottom: 10px;
 
   > label {
     color: var(--text-dim);
     font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
   }
 }
 
 .page-title {
-  margin: 0 0 20px;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  margin: 0 0 14px;
+  font-size: 18px;
+  font-weight: 600;
 }
 
-// 卡片容器：悬浮面板基础形态
+// 页头：标题 + 右侧动作（如返回按钮）
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+
+  .page-title {
+    margin: 0;
+  }
+}
+
+// 卡片容器：克制的基础形态
 .card-panel {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--dur) var(--ease-out), box-shadow var(--dur), border-color var(--dur);
-
-  &:hover {
-    border-color: var(--border-strong);
-  }
 }
 
-// 入场动效（配合 animation-delay 做级联）
+// 入场动效
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -225,7 +217,7 @@ button {
 @keyframes pop-in {
   from {
     opacity: 0;
-    transform: scale(0.92);
+    transform: scale(0.97);
   }
   to {
     opacity: 1;
@@ -236,7 +228,7 @@ button {
 @keyframes slide-in-right {
   from {
     opacity: 0;
-    transform: translateX(24px);
+    transform: translateX(16px);
   }
   to {
     opacity: 1;
@@ -245,7 +237,7 @@ button {
 }
 
 .anim-fade-up {
-  animation: fade-up 0.45s var(--ease-out) both;
+  animation: fade-up 0.3s var(--ease-out) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

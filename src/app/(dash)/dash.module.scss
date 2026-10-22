@@ -1,88 +1,83 @@
+.shell {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden; // 滚动收敛到 main 内部
+}
+
 .sidebar {
-  position: fixed;
-  top: 16px;
-  bottom: 16px;
-  left: 16px;
-  width: calc(var(--sidebar-w) - 32px);
+  flex-shrink: 0;
+  width: calc(var(--sidebar-w) - 24px);
+  height: calc(100dvh - 24px);
+  margin: 12px 0 12px 12px;
   display: flex;
   flex-direction: column;
-  padding: 22px 14px;
-  background: var(--glass);
-  backdrop-filter: blur(18px);
+  padding: 14px 10px;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   z-index: 100;
-  transition: width var(--dur) var(--ease-out), background var(--dur), border-color var(--dur);
+  transition: width var(--dur) var(--ease-out);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 9px;
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 26px;
-  padding: 0 8px;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  padding: 0 6px;
   overflow: hidden;
   white-space: nowrap;
 }
 
 .brandText {
-  background: var(--grad-accent-text);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text);
 }
 
 .logo {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
-  background: var(--grad-accent);
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius);
+  background: var(--accent);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(139, 123, 255, 0.4);
 }
 
 .nav {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 2px;
   overflow: hidden;
 }
 
 .item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 13px;
-  border-radius: 12px;
+  gap: 9px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
   color: var(--text-dim);
+  font-size: 13.5px;
   white-space: nowrap;
-  transition:
-    background var(--dur-fast),
-    color var(--dur-fast),
-    transform var(--dur-fast) var(--ease-spring);
-  animation: fade-up 0.5s var(--ease-out) both;
+  transition: background var(--dur-fast), color var(--dur-fast);
 
   &:hover {
     background: var(--bg-hover);
     color: var(--text);
-    transform: translateX(3px);
   }
 }
 
 .active {
-  background: var(--grad-accent-soft);
-  color: var(--text);
+  background: var(--accent-soft);
+  color: var(--accent);
 
   .icon {
-    background: var(--grad-accent);
-    color: #fff;
+    color: var(--accent);
   }
 }
 
@@ -90,32 +85,27 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 7px;
+  width: 18px;
+  height: 18px;
   color: var(--text-faint);
-  transition: background var(--dur-fast), color var(--dur-fast);
+  transition: color var(--dur-fast);
 }
 
 .footer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 
   .btn {
     justify-content: flex-start;
+    border-color: transparent;
   }
-}
-
-.themeIcon {
-  display: inline-flex;
-  animation: pop-in 0.35s var(--ease-spring) both;
 }
 
 // ---------- 折叠态：图标窄轨 ----------
 .collapsed {
-  width: 68px;
-  padding: 22px 10px;
+  width: 56px;
+  padding: 14px 8px;
 
   .brand {
     justify-content: center;
@@ -129,7 +119,7 @@
   .item,
   .footer .btn {
     justify-content: center;
-    padding: 10px;
+    padding: 7px;
   }
 
   .btnText {
@@ -137,30 +127,33 @@
   }
 }
 
+// ---------- 内容区：独立滚动列（内边距由 transition.module 的内容画布统一管理） ----------
 .main {
-  margin-left: calc(var(--sidebar-w) + 8px);
-  padding: 28px 32px 120px;
-  max-width: 1240px;
-  transition: margin var(--dur) var(--ease-out);
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-// 折叠时主区左移（跟随窄轨宽度）
-:global(html.sidebar-collapsed) .main {
-  margin-left: 84px;
-}
-
-// ---------- 移动端：侧边栏折叠为顶部栏（不支持折叠态） ----------
+// ---------- 移动端：侧栏变顶栏（同样不随内容滚动） ----------
 @media (max-width: 860px) {
+  .shell {
+    flex-direction: column;
+  }
+
   .sidebar {
-    top: 8px;
-    bottom: auto;
-    left: 8px;
-    right: 8px;
     width: auto;
+    height: auto;
+    margin: 0;
     flex-direction: row;
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    flex-shrink: 0;
   }
 
   .brand {
@@ -170,9 +163,8 @@
   }
 
   .logo {
-    width: 28px;
-    height: 28px;
-    border-radius: 9px;
+    width: 26px;
+    height: 26px;
   }
 
   .nav {
@@ -184,17 +176,17 @@
   }
 
   .item {
-    padding: 8px 10px;
+    padding: 6px 9px;
     font-size: 13px;
     flex-shrink: 0;
   }
 
   .footer {
     flex-direction: row;
-    gap: 4px;
+    gap: 2px;
 
     .btn {
-      padding: 8px 10px;
+      padding: 6px 8px;
     }
   }
 
@@ -204,10 +196,5 @@
 
   .collapseBtn {
     display: none; // 移动端无折叠概念
-  }
-
-  .main {
-    margin-left: 0 !important;
-    padding: 74px 14px 120px;
   }
 }

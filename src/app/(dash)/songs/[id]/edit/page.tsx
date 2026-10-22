@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { apiJson } from "@/shared/api-client";
 import { SongForm } from "@/features/songs/components/song-form";
+import { BackButton } from "@/components/back-button";
 import type { SongDto } from "@/features/songs/service";
 
 export default function EditSongPage() {
@@ -21,7 +22,10 @@ export default function EditSongPage() {
   if (!song) return null;
   return (
     <>
-      <h1 className="page-title">编辑：{song.title}</h1>
+      <div className="page-head">
+        <h1 className="page-title">编辑：{song.title}</h1>
+        <BackButton />
+      </div>
       <SongForm song={song} />
     </>
   );

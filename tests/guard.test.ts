@@ -67,8 +67,7 @@ afterAll(() => {
 });
 
 declare global {
-  // eslint-disable-next-line no-var
-  var __testSession: { sessionId: string; userId: string } | undefined;
+    var __testSession: { sessionId: string; userId: string } | undefined;
 }
 
 describe("鉴权守卫权限矩阵", () => {

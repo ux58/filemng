@@ -29,7 +29,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 18px;
+  gap: 14px;
 }
 
 .card {
@@ -37,8 +37,8 @@
   animation: fade-up 0.5s var(--ease-out) both;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-glow);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-sm);
   }
 }
 
@@ -57,55 +57,49 @@
 }
 
 .card:hover .cover {
-  transform: scale(1.06);
+  transform: scale(1.03);
 }
 
 .ph {
   display: grid;
   place-items: center;
-  background: var(--grad-accent-soft);
-
-  span {
-    font-size: 44px;
-    color: var(--accent);
-    opacity: 0.55;
-    transition: transform 0.45s var(--ease-spring);
-  }
-}
-
-.card:hover .ph span {
-  transform: scale(1.15);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 // 悬浮播放按钮：封面右下角浮现
 .playBtn {
   position: absolute;
-  right: 12px;
-  bottom: 12px;
-  width: 46px;
-  height: 46px;
+  right: 10px;
+  bottom: 10px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
   border: none;
-  border-radius: 50%;
-  background: var(--grad-accent);
+  border-radius: var(--radius);
+  background: var(--accent);
   color: #fff;
-  font-size: 16px;
-  box-shadow: 0 6px 18px rgba(139, 123, 255, 0.5);
+  box-shadow: var(--shadow-sm);
   opacity: 0;
-  transform: translateY(10px) scale(0.85);
+  transform: translateY(8px) scale(0.9);
   transition:
     opacity var(--dur) var(--ease-out),
-    transform var(--dur) var(--ease-spring),
-    box-shadow var(--dur);
+    transform var(--dur) var(--ease-spring);
 
   &:hover {
-    transform: translateY(0) scale(1.12) !important;
-    box-shadow: 0 8px 26px rgba(139, 123, 255, 0.65);
+    background: var(--accent-hover);
+    transform: translateY(0) scale(1.05) !important;
   }
 }
 
 .card:hover .playBtn {
   opacity: 1;
   transform: translateY(0) scale(1);
+}
+
+.card .playBtn:focus-visible {
+  opacity: 1;
 }
 
 // 时长角标
@@ -168,7 +162,7 @@
 }
 
 .tagAccent {
-  background: var(--grad-accent-soft);
+  background: var(--accent-soft);
   border-color: transparent;
   color: var(--accent);
 }
@@ -201,7 +195,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: var(--grad-accent-soft);
+  background: var(--accent-soft);
   color: var(--accent);
   font-size: 26px;
 }
@@ -229,9 +223,9 @@
   }
 
   .cur {
-    background: var(--grad-accent);
+    background: var(--accent);
     border-color: transparent;
     color: #fff;
-    box-shadow: 0 4px 14px rgba(139, 123, 255, 0.4);
+    box-shadow: none;
   }
 }

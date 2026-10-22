@@ -1,25 +1,31 @@
 .bar {
   position: fixed;
-  bottom: 18px;
-  left: calc(var(--sidebar-w) + 24px);
-  right: 24px;
+  bottom: 12px;
+  left: calc(var(--sidebar-w) + 4px);
+  right: 16px;
   z-index: 900;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 14px;
-  background: var(--glass);
-  backdrop-filter: blur(18px);
-  border: 1px solid var(--border-strong);
-  border-radius: 18px;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--glass-strong);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  animation: fade-up 0.4s var(--ease-spring) both;
+  animation: fade-up 0.3s var(--ease-spring) both;
+  transition: left var(--dur) var(--ease-out);
 
   audio {
     flex: 1;
-    height: 36px;
-    border-radius: 999px;
+    height: 34px;
+    border-radius: var(--radius-sm);
   }
+}
+
+// 折叠态：跟随窄轨左移
+:global(html.sidebar-collapsed) .bar {
+  left: 64px;
 }
 
 .cover {
@@ -60,11 +66,11 @@
 // 移动端：隐藏元信息文本，仅留控件
 @media (max-width: 860px) {
   .bar {
-    left: 12px;
-    right: 12px;
-    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 8px;
     gap: 8px;
-    padding: 8px 10px;
+    padding: 6px 10px;
   }
 
   .meta,

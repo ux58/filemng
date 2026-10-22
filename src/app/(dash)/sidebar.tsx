@@ -24,17 +24,21 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => init, [init]);
+  // 恢复持久化的折叠状态（rAF 应用避免 effect 级联渲染；首帧短暂展开为可接受折衷）
   useEffect(() => {
-    const stored = localStorage.getItem(COLLAPSE_KEY) === "1";
-    setCollapsed(stored);
-    document.documentElement.classList.toggle("sidebar-collapsed", stored);
+    if (localStorage.getItem(COLLAPSE_KEY) === "1") {
+      requestAnimationFrame(() => setCollapsed(true));
+    }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("sidebar-collapsed", collapsed);
+  }, [collapsed]);
 
   function toggleCollapse() {
     setCollapsed((prev) => {
       const next = !prev;
       localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
-      document.documentElement.classList.toggle("sidebar-collapsed", next);
       return next;
     });
   }

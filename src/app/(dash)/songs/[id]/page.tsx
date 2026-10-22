@@ -7,6 +7,7 @@ import { apiJson } from "@/shared/api-client";
 import { formatBytes, formatDateTime, formatDuration } from "@/shared/format";
 import { Play } from "lucide-react";
 import { usePlayerStore } from "@/stores/player";
+import { BackButton } from "@/components/back-button";
 import type { SongDto } from "@/features/songs/service";
 import styles from "./detail.module.scss";
 
@@ -51,9 +52,7 @@ export default function SongDetailPage() {
             <Link className="btn" href={`/songs/${song.id}/edit`}>
               编辑
             </Link>
-            <Link className="btn" href="/songs">
-              返回列表
-            </Link>
+            <BackButton />
           </div>
         </div>
       </header>
