@@ -21,6 +21,9 @@ export default function DocsPage() {
         <li>
           Key 权限按 scope 收敛：<code>songs:read</code> 只读，<code>songs:write</code> 写入。
         </li>
+        <li>
+          域名白名单：创建 Key 时可绑定允许的来源域名（如 <code>app.example.com</code>），配置后仅白名单页面的前端可以携带该 Key 调用；留空则不限制（适合服务端直连）。
+        </li>
         <li>每个 Key 独立限流（默认 60 次/分钟），超限返回 429 与 <code>Retry-After</code> 头。</li>
         <li>错误统一为 <code>{"{ error: { code, message } }"}</code>。</li>
       </ul>

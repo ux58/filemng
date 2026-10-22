@@ -8,6 +8,13 @@
       "when": 1792577375669,
       "tag": "0000_white_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792627250566,
+      "tag": "0001_illegal_korath",
+      "breakpoints": true
     }
   ]
 }

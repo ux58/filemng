@@ -10,6 +10,13 @@
   }
 }
 
+.hintLine {
+  color: var(--text-faint);
+  font-size: 12px;
+  margin: -8px 0 18px;
+  max-width: 1020px;
+}
+
 // 创建表单：悬浮面板
 .create {
   display: grid;

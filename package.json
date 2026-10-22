@@ -21,6 +21,7 @@
     "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.4",
     "jose": "^6.2.13",
+    "lucide-react": "^1.61.0",
     "music-metadata": "^12.2.3",
     "mysql2": "^3.24.6",
     "next": "16.4.2",

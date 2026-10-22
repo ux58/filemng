@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { apiJson } from "@/shared/api-client";
 import { formatBytes, formatDateTime, formatDuration } from "@/shared/format";
+import { Play } from "lucide-react";
 import { usePlayerStore } from "@/stores/player";
 import type { SongDto } from "@/features/songs/service";
 import styles from "./detail.module.scss";
@@ -44,7 +45,7 @@ export default function SongDetailPage() {
           <div className={styles.actions}>
             {song.audio && (
               <button className="btn primary" onClick={() => play(song)}>
-                ▶ 播放
+                <Play size={14} strokeWidth={2.4} style={{marginRight:6}} />播放
               </button>
             )}
             <Link className="btn" href={`/songs/${song.id}/edit`}>

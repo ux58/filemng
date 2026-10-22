@@ -10,6 +10,7 @@ export interface ApiKeyDto {
   name: string;
   keyPrefix: string;
   scopes: string[];
+  allowedDomains: string[];
   rateLimit: number;
   lastUsedAt: string | null;
   expiresAt: string | null;
@@ -22,6 +23,7 @@ const toDto = (row: typeof schema.apiKeys.$inferSelect): ApiKeyDto => ({
   name: row.name,
   keyPrefix: row.keyPrefix,
   scopes: row.scopes.split(","),
+  allowedDomains: row.allowedDomains ? row.allowedDomains.split(",") : [],
   rateLimit: row.rateLimit,
   lastUsedAt: row.lastUsedAt,
   expiresAt: row.expiresAt,
@@ -47,6 +49,7 @@ export async function createApiKey(input: ApiKeyCreateInput): Promise<{ dto: Api
     keyPrefix: prefix,
     keyHash: hash,
     scopes: input.scopes.join(","),
+    allowedDomains: input.allowedDomains.join(","),
     rateLimit: input.rateLimit,
     expiresAt: input.expiresAt,
     createdAt: now,

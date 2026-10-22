@@ -6,6 +6,7 @@ import { formatDateTime } from "@/shared/format";
 import { SCOPES } from "@/shared/constants";
 import { confirmDialog } from "@/components/confirm";
 import { toast } from "@/stores/toast";
+import { KeyRound } from "lucide-react";
 import styles from "./page.module.scss";
 
 interface ApiKeyItem {
@@ -13,6 +14,7 @@ interface ApiKeyItem {
   name: string;
   keyPrefix: string;
   scopes: string[];
+  allowedDomains: string[];
   rateLimit: number;
   lastUsedAt: string | null;
   expiresAt: string | null;
@@ -26,6 +28,7 @@ export default function KeysPage() {
   const [scopes, setScopes] = useState<string[]>(["songs:read"]);
   const [rateLimit, setRateLimit] = useState("60");
   const [expiresAt, setExpiresAt] = useState("");
+  const [domains, setDomains] = useState("");
   const [created, setCreated] = useState<{ name: string; key: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -44,10 +47,15 @@ export default function KeysPage() {
         scopes,
         rateLimit: Number(rateLimit) || 60,
         expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+        allowedDomains: domains
+          .split(/[,\s]+/)
+          .map((d) => d.trim())
+          .filter(Boolean),
       });
       setCreated({ name: res.name, key: res.key });
       setName("");
       setExpiresAt("");
+      setDomains("");
       const r = await apiJson<{ items: ApiKeyItem[] }>("/api/keys");
       setItems(r.items);
     } catch (err) {
@@ -109,15 +117,30 @@ export default function KeysPage() {
           <label htmlFor="k-exp">过期时间（可选）</label>
           <input id="k-exp" type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
         </div>
+        <div className="field">
+          <label htmlFor="k-domains">域名白名单（可选，逗号分隔）</label>
+          <input
+            id="k-domains"
+            value={domains}
+            onChange={(e) => setDomains(e.target.value)}
+            placeholder="app.example.com, foo.cn"
+          />
+        </div>
         <button className="btn primary" disabled={busy || scopes.length === 0}>
           {busy ? "创建中…" : "创建 Key"}
         </button>
       </form>
+      <p className={styles.hintLine}>
+        域名白名单为空时不限制来源；配置后该 Key 仅允许来自白名单域名的浏览器调用（依据 Origin/Referer，直接
+        cURL 等无来源请求将被拒绝，服务端集成请另建不带白名单的 Key）。
+      </p>
 
       {created && (
         <div className={styles.modalMask} onClick={() => setCreated(null)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalBadge}>⚿</div>
+            <div className={styles.modalBadge}>
+              <KeyRound size={20} strokeWidth={2.2} />
+            </div>
             <strong>请立即保存「{created.name}」的 Key</strong>
             <p className={styles.modalHint}>明文仅展示这一次，关闭后无法再次查看（服务端只存哈希）。</p>
             <code className={styles.keyText}>{created.key}</code>
@@ -140,6 +163,7 @@ export default function KeysPage() {
             <th>Key 前缀</th>
             <th>权限</th>
             <th>限流</th>
+            <th>域名白名单</th>
             <th>最近使用</th>
             <th>过期时间</th>
             <th>状态</th>
@@ -155,6 +179,7 @@ export default function KeysPage() {
               </td>
               <td>{k.scopes.join(", ")}</td>
               <td>{k.rateLimit}/min</td>
+              <td>{k.allowedDomains.length ? k.allowedDomains.join(", ") : "不限"}</td>
               <td>{formatDateTime(k.lastUsedAt)}</td>
               <td>{formatDateTime(k.expiresAt)}</td>
               <td>{k.revokedAt ? <span className={styles.badgeRevoked}>已吊销</span> : <span className={styles.badgeActive}>有效</span>}</td>

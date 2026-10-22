@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiJson, apiJsonBody } from "@/shared/api-client";
 import { toast } from "@/stores/toast";
+import { Music2 } from "lucide-react";
 import styles from "../login/auth.module.scss";
 
 /** 首次运行引导：仅当系统中无任何用户时可创建管理员 */
@@ -58,7 +59,7 @@ export default function SetupPage() {
   return (
     <main className={styles.wrap}>
       <form className={styles.card} onSubmit={submit}>
-        <div className={styles.badge}>♫</div>
+        <div className={styles.badge}><Music2 size={24} strokeWidth={2.2} /></div>
         <h1>初始化管理员</h1>
         <p className={styles.hint}>首次运行：创建管理员账号后即可开始管理音乐库。</p>
         <div className="field">

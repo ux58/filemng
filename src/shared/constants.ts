@@ -14,6 +14,9 @@ export const REFRESH_TOKEN_TTL_SEC = 14 * 24 * 60 * 60; // 14d
 export const API_KEY_PREFIX = "fmm_";
 export const API_KEY_DEFAULT_RPM = 60;
 
+/** 合法域名（不带协议/路径，至少含一个点）：example.com / api.example.com */
+export const DOMAIN_PATTERN = /^(?=.{4,253}$)[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
 export const ERROR_CODES = {
   UNAUTHORIZED: "unauthorized",
   FORBIDDEN: "forbidden",

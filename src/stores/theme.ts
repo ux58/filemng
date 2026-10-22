@@ -26,8 +26,12 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
   },
   toggle: () => {
     const next: Theme = get().theme === "dark" ? "light" : "dark";
+    const root = document.documentElement;
+    // 切换瞬间禁用全站过渡：颜色立即生效，避免大面积重绘的卡顿感
+    root.classList.add("theme-switching");
     localStorage.setItem(STORAGE_KEY, next);
     apply(next);
     set({ theme: next });
+    requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove("theme-switching")));
   },
 }));

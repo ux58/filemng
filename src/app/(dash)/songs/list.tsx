@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiJson } from "@/shared/api-client";
 import { formatDuration } from "@/shared/format";
+import { Play, Music } from "lucide-react";
 import { usePlayerStore } from "@/stores/player";
 import { confirmDialog } from "@/components/confirm";
 import { toast } from "@/stores/toast";
@@ -98,7 +99,7 @@ export function SongList() {
                 <img className={styles.cover} src={song.cover.url} alt="" loading="lazy" />
               ) : (
                 <div className={`${styles.cover} ${styles.ph}`}>
-                  <span>♪</span>
+                  <Music size={40} strokeWidth={1.6} />
                 </div>
               )}
               {song.audio && (
@@ -110,7 +111,7 @@ export function SongList() {
                   }}
                   title="播放"
                 >
-                  ▶
+                  <Play size={16} strokeWidth={2.4} />
                 </button>
               )}
               {song.durationSec != null && <span className={styles.dur}>{formatDuration(song.durationSec)}</span>}
@@ -138,7 +139,9 @@ export function SongList() {
         ))}
         {data && data.items.length === 0 && (
           <div className={`${styles.empty} card-panel`}>
-            <span className={styles.emptyIcon}>♪</span>
+            <span className={styles.emptyIcon}>
+              <Music size={26} strokeWidth={1.8} />
+            </span>
             暂无歌曲，点击右上角「上传歌曲」开始。
           </div>
         )}

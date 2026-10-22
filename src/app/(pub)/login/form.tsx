@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiJsonBody } from "@/shared/api-client";
 import { toast } from "@/stores/toast";
+import { Music2 } from "lucide-react";
 import styles from "./auth.module.scss";
 
 export function LoginForm() {
@@ -28,7 +29,7 @@ export function LoginForm() {
   return (
     <main className={styles.wrap}>
       <form className={styles.card} onSubmit={submit}>
-        <div className={styles.badge}>♫</div>
+        <div className={styles.badge}><Music2 size={24} strokeWidth={2.2} /></div>
         <h1>欢迎回来</h1>
         <p className={styles.sub}>登录 FileMng 音乐库管理你的音乐</p>
         <div className="field">

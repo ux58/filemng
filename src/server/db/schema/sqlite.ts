@@ -41,6 +41,7 @@ export const apiKeys = sqliteTable(
     keyPrefix: text("key_prefix").notNull(),
     keyHash: text("key_hash").notNull().unique(),
     scopes: text("scopes").notNull(), // 逗号分隔，如 "songs:read,songs:write"
+    allowedDomains: text("allowed_domains").notNull().default(""), // 逗号分隔域名白名单，空 = 不限
     rateLimit: integer("rate_limit").notNull().default(60),
     lastUsedAt: text("last_used_at"),
     expiresAt: text("expires_at"),

@@ -15,7 +15,7 @@ export type Principal =
 /** 双通道鉴权：X-API-Key（外部调用，scope 受限）或 会话 Cookie（管理 UI，隐含全部权限） */
 export async function authenticate(req: NextRequest): Promise<Principal | null> {
   const apiKey = req.headers.get("x-api-key");
-  if (apiKey) return authenticateApiKey(apiKey);
+  if (apiKey) return authenticateApiKey(apiKey, req);
   const token = req.cookies.get(COOKIE_ACCESS)?.value;
   if (!token) return null;
   const claims = await verifyAccessToken(token);
@@ -42,7 +42,7 @@ export async function requireUser(req: NextRequest): Promise<Principal & { kind:
 
 const lastUsedAt = new Map<string, string>(); // keyId → 上次落库时间，节流避免每请求写库
 
-async function authenticateApiKey(key: string): Promise<Principal> {
+async function authenticateApiKey(key: string, req: NextRequest): Promise<Principal> {
   const db = await getDb();
   const rows = await db.select().from(schema.apiKeys).where(eq(schema.apiKeys.keyHash, hashApiKey(key))).limit(1);
   const record = rows[0];
@@ -52,6 +52,24 @@ async function authenticateApiKey(key: string): Promise<Principal> {
   if (record.revokedAt) throw unauthorized;
   if (record.expiresAt && record.expiresAt < now) {
     throw new ApiError(401, ERROR_CODES.UNAUTHORIZED, "API Key 已过期");
+  }
+  // 域名白名单：配置后仅允许白名单域名的浏览器端调用（依据 Origin/Referer；无来源头视为越权）
+  if (record.allowedDomains) {
+    const allowed = record.allowedDomains.split(",").filter(Boolean);
+    const referer = req.headers.get("referer");
+    const originSource = req.headers.get("origin") ?? (referer ? referer : null);
+    let hostname: string | null = null;
+    if (originSource) {
+      try {
+        hostname = new URL(originSource).hostname;
+      } catch {
+        hostname = null;
+      }
+    }
+    const permitted = hostname !== null && allowed.some((d) => hostname === d || hostname.endsWith("." + d));
+    if (!permitted) {
+      throw new ApiError(403, ERROR_CODES.FORBIDDEN, "该 API Key 已绑定域名白名单，当前来源不被允许");
+    }
   }
   const rl = rateLimit.consume(`key:${record.id}`, record.rateLimit);
   if (!rl.ok) {
