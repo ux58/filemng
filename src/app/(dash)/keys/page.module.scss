@@ -6,7 +6,7 @@
   code {
     background: var(--bg-raised);
     padding: 2px 7px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
   }
 }
 
@@ -55,7 +55,7 @@
   background: var(--bg-raised);
   cursor: pointer;
   font-size: 13px;
-  transition: all var(--dur-fast) var(--ease-spring);
+  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast), transform var(--dur-fast);
 
   &:hover {
     border-color: var(--border-strong);
@@ -121,7 +121,7 @@
   padding: 13px 16px;
   background: var(--bg);
   border: 1px dashed var(--warn);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   word-break: break-all;
   font-size: 14px;
 }
@@ -151,17 +151,18 @@
     background: var(--bg-card);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
     animation: fade-up 0.4s var(--ease-out) both;
   }
 
   td:first-child {
     border-left: 1px solid var(--border);
-    border-radius: 12px 0 0 12px;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
   }
 
   td:last-child {
     border-right: 1px solid var(--border);
-    border-radius: 0 12px 12px 0;
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
   }
 
   tbody tr {
@@ -176,7 +177,7 @@
   code {
     background: var(--bg);
     padding: 2px 7px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     font-size: 12px;
   }
 }

@@ -9,8 +9,13 @@ import styles from "./dash.module.scss";
 export default function DashLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className={styles.shell}>
+      <a href="#main-content" className="skip-link">
+        跳转到主内容
+      </a>
       <Sidebar />
-      <main className={styles.main}>{children}</main>
+      <main id="main-content" className={styles.main}>
+        {children}
+      </main>
     </div>
   );
 }

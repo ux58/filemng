@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { create } from "zustand";
 import styles from "./confirm.module.scss";
 
@@ -11,7 +12,7 @@ interface ConfirmState {
   resolve: ((ok: boolean) => void) | null;
 }
 
-const useConfirmStore = create<ConfirmState>((set) => ({
+const useConfirmStore = create<ConfirmState>(() => ({
   open: false,
   title: "",
   message: "",
@@ -30,6 +31,18 @@ export function confirmDialog(opts: { title: string; message?: string; danger?: 
 
 export function ConfirmHost() {
   const { open, title, message, danger, resolve } = useConfirmStore();
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        const { resolve: r } = useConfirmStore.getState();
+        r?.(false);
+        useConfirmStore.setState({ open: false, resolve: null });
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
   if (!open) return null;
 
   const done = (ok: boolean) => {

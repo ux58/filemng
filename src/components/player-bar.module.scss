@@ -31,7 +31,7 @@
 .cover {
   width: 46px;
   height: 46px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   object-fit: cover;
   animation: pop-in 0.35s var(--ease-spring) both;
 }

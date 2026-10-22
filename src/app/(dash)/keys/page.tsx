@@ -38,6 +38,16 @@ export default function KeysPage() {
       .catch((e) => toast.err(e.message));
   }, []);
 
+  // 明文 Key 模态：Escape 关闭
+  useEffect(() => {
+    if (!created) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCreated(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [created]);
+
   async function create(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
