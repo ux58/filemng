@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiUpload } from "@/shared/api-client";
 import { toast } from "@/stores/toast";
 import { EMPTY_SONG_FORM, type SongCreateInput } from "@/features/songs/schema";
+import { parseLyricsFile } from "@/features/songs/lyrics-import";
 import type { SongDto } from "@/features/songs/service";
 import styles from "./song-form.module.scss";
 
@@ -59,6 +60,29 @@ export function SongForm({ song }: { song?: SongDto }) {
   // 非负整数字段：仅放行数字，杜绝负号/小数点/科学计数法进入表单态
   const setNum = (k: keyof SongFormValue) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setV((prev) => ({ ...prev, [k]: e.target.value.replace(/\D/g, "").slice(0, 5) }));
+
+  /** 歌词文件导入：LRC/SRT/VTT 自动剥离时间轴与序号，TXT 原样导入 */
+  async function importLyrics(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // 允许重复选择同一文件
+    if (!file) return;
+    if (file.size > 512 * 1024) {
+      toast.err("歌词文件过大（限 512KB）");
+      return;
+    }
+    try {
+      const text = await file.text();
+      const parsed = parseLyricsFile(text, file.name);
+      if (!parsed.trim()) {
+        toast.err("未能从文件中解析出歌词内容");
+        return;
+      }
+      setV((prev) => ({ ...prev, lyrics: parsed }));
+      toast.ok(`已导入歌词：${file.name}`);
+    } catch {
+      toast.err("歌词文件读取失败");
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -133,6 +157,10 @@ export function SongForm({ song }: { song?: SongDto }) {
       <div className="field">
         <label htmlFor="f-lyrics">歌词</label>
         <textarea id="f-lyrics" rows={10} value={v.lyrics} onChange={set("lyrics")} />
+      </div>
+      <div className="field">
+        <label htmlFor="f-lyrics-file">歌词文件导入（支持 .lrc / .srt / .vtt / .txt，自动去除时间轴，导入后可编辑）</label>
+        <input id="f-lyrics-file" type="file" accept=".lrc,.srt,.vtt,.txt,text/plain" onChange={importLyrics} />
       </div>
       <div className={styles.actions}>
         <button className="btn primary" disabled={busy}>

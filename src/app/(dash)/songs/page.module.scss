@@ -230,3 +230,35 @@
     box-shadow: none;
   }
 }
+
+// ---------- 加载骨架 ----------
+.skCard {
+  animation: none;
+}
+
+.skBlock {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--bg-hover);
+  animation: sk-pulse 1.2s ease-in-out infinite;
+}
+
+.skCover {
+  aspect-ratio: 1;
+  height: auto;
+  border-radius: 0;
+}
+
+.skW70 {
+  width: 70%;
+}
+
+.skW45 {
+  width: 45%;
+}
+
+@keyframes sk-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}

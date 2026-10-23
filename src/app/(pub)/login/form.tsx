@@ -19,7 +19,7 @@ export function LoginForm() {
     setBusy(true);
     try {
       await apiJsonBody("POST", "/api/auth/login", { username, password });
-      router.replace(next, { transitionTypes: ["nav-forward"] });
+      router.replace(next);
     } catch (err) {
       toast.err(err instanceof Error ? err.message : "登录失败");
       setBusy(false);

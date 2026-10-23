@@ -106,3 +106,37 @@
 .dim {
   color: var(--text-faint);
 }
+
+// ---------- 加载骨架 ----------
+.skLines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+
+.skLine {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--bg-hover);
+  animation: sk-pulse 1.2s ease-in-out infinite;
+}
+
+.skW55 {
+  width: 55%;
+}
+
+.skW35 {
+  width: 35%;
+}
+
+.skPulse {
+  animation: sk-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes sk-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}

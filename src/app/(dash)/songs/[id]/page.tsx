@@ -24,7 +24,18 @@ export default function SongDetailPage() {
   }, [id]);
 
   if (missing) return <p>歌曲不存在。</p>;
-  if (!song) return null;
+  if (!song)
+    return (
+      <div className={styles.detail} aria-busy="true">
+        <div className={styles.head}>
+          <div className={`${styles.cover} ${styles.skPulse}`} />
+          <div className={styles.skLines}>
+            <div className={`${styles.skLine} ${styles.skW55}`} />
+            <div className={`${styles.skLine} ${styles.skW35}`} />
+          </div>
+        </div>
+      </div>
+    );
 
   return (
     <div className={styles.detail}>

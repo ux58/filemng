@@ -99,6 +99,16 @@ export function SongList() {
       </form>
 
       <div className={styles.grid}>
+        {!data &&
+          Array.from({ length: 8 }, (_, i) => (
+            <div key={i} className={`${styles.card} card-panel ${styles.skCard}`} aria-hidden="true">
+              <div className={`${styles.skBlock} ${styles.skCover}`} />
+              <div className={styles.body}>
+                <div className={`${styles.skBlock} ${styles.skW70}`} />
+                <div className={`${styles.skBlock} ${styles.skW45}`} />
+              </div>
+            </div>
+          ))}
         {items.map((song, i) => (
           <article
             key={song.id}
