@@ -6,6 +6,7 @@ import { apiJson } from "@/shared/api-client";
 import { SongForm } from "@/features/songs/components/song-form";
 import { BackButton } from "@/components/back-button";
 import type { SongDto } from "@/features/songs/service";
+import styles from "./edit.module.scss";
 
 export default function EditSongPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,7 +20,15 @@ export default function EditSongPage() {
   }, [id]);
 
   if (missing) return <p>歌曲不存在。</p>;
-  if (!song) return null;
+  if (!song)
+    return (
+      <div aria-busy="true">
+        <div className="page-head">
+          <div className={`page-title ${styles.skTitle}`} />
+        </div>
+        <div className={styles.skBlock} />
+      </div>
+    );
   return (
     <>
       <div className="page-head">

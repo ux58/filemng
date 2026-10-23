@@ -1,0 +1,22 @@
+// 编辑页加载骨架
+.skTitle {
+  width: 260px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--bg-hover);
+  animation: sk-pulse 1.2s ease-in-out infinite;
+}
+
+.skBlock {
+  height: 320px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  animation: sk-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes sk-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}

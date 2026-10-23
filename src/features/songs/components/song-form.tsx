@@ -47,8 +47,9 @@ function toPayload(v: SongFormValue): SongCreateInput {
   };
 }
 
-export function SongForm({ song }: { song?: SongDto }) {
+export function SongForm({ song, cancelTo }: { song?: SongDto; cancelTo?: string }) {
   const router = useRouter();
+  const backTo = cancelTo ?? (song ? `/songs/${song.id}` : "/songs");
   const [v, setV] = useState<SongFormValue>(() => toFormValue(song));
   const [audio, setAudio] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
@@ -166,7 +167,7 @@ export function SongForm({ song }: { song?: SongDto }) {
         <button className="btn primary" disabled={busy}>
           {busy ? "保存中…" : song ? "保存修改" : "创建"}
         </button>
-        <button type="button" className="btn" onClick={() => router.back()}>
+        <button type="button" className="btn" onClick={() => router.push(backTo, { transitionTypes: ["nav-back"] })}>
           取消
         </button>
       </div>
