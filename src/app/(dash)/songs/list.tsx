@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiJson } from "@/shared/api-client";
+import { useApiJson, clearApiCache } from "@/shared/use-api-json";
 import { formatDuration } from "@/shared/format";
 import { Play, Music } from "lucide-react";
 import { usePlayerStore } from "@/stores/player";
@@ -27,22 +28,18 @@ export function SongList() {
   const genre = sp.get("genre") ?? "";
   const year = sp.get("year") ?? "";
 
-  const [data, setData] = useState<ListResult | null>(null);
   const [search, setSearch] = useState(q);
+  const [rev, setRev] = useState(0);
   const play = usePlayerStore((s) => s.play);
+
+  // URL 为唯一过滤状态源：改参数即重新拉取（缓存命中时先渲染旧值）
+  const params = new URLSearchParams();
+  if (page > 1) params.set("page", String(page));
+  if (q) params.set("q", q);
+  if (genre) params.set("genre", genre);
+  if (year) params.set("year", year);
+  const { data } = useApiJson<ListResult>(`/api/v1/songs?${params}`, rev);
   const items = data?.items ?? [];
-
-  // URL 为唯一过滤状态源：改参数即重新拉取
-  const load = useCallback(() => {
-    const params = new URLSearchParams();
-    if (page > 1) params.set("page", String(page));
-    if (q) params.set("q", q);
-    if (genre) params.set("genre", genre);
-    if (year) params.set("year", year);
-    apiJson<ListResult>(`/api/v1/songs?${params}`).then(setData).catch((e) => toast.err(e.message));
-  }, [page, q, genre, year]);
-
-  useEffect(load, [load]);
 
   function applyFilter(next: Partial<{ q: string; genre: string; year: string; page: number }>) {
     const params = new URLSearchParams();
@@ -56,7 +53,8 @@ export function SongList() {
     try {
       await apiJson(`/api/v1/songs/${id}`, { method: "DELETE" });
       toast.ok("已删除");
-      load();
+      clearApiCache();
+      setRev((r) => r + 1);
     } catch (e) {
       toast.err(e instanceof Error ? e.message : "删除失败");
     }

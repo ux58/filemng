@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { apiJson } from "@/shared/api-client";
+import { useApiJson } from "@/shared/use-api-json";
 import { SongForm } from "@/features/songs/components/song-form";
 import { BackButton } from "@/components/back-button";
 import type { SongDto } from "@/features/songs/service";
@@ -10,16 +9,9 @@ import styles from "./edit.module.scss";
 
 export default function EditSongPage() {
   const { id } = useParams<{ id: string }>();
-  const [song, setSong] = useState<SongDto | null>(null);
-  const [missing, setMissing] = useState(false);
+  const { data: song, error } = useApiJson<SongDto>(`/api/v1/songs/${id}`);
 
-  useEffect(() => {
-    apiJson<SongDto>(`/api/v1/songs/${id}`)
-      .then(setSong)
-      .catch(() => setMissing(true));
-  }, [id]);
-
-  if (missing) return <p>歌曲不存在。</p>;
+  if (error && !song) return <p>歌曲不存在。</p>;
   if (!song)
     return (
       <div aria-busy="true">

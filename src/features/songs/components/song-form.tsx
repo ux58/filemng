@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiUpload } from "@/shared/api-client";
+import { clearApiCache } from "@/shared/use-api-json";
 import { toast } from "@/stores/toast";
 import { EMPTY_SONG_FORM, type SongCreateInput } from "@/features/songs/schema";
 import { parseLyricsFile } from "@/features/songs/lyrics-import";
@@ -93,6 +94,7 @@ export function SongForm({ song, cancelTo }: { song?: SongDto; cancelTo?: string
         ? await apiUpload<SongDto>("PATCH", `/api/v1/songs/${song.id}`, toPayload(v), { audio, cover })
         : await apiUpload<SongDto>("POST", "/api/v1/songs", toPayload(v), { audio, cover });
       toast.ok(song ? "已保存" : "已创建");
+      clearApiCache();
       router.push(`/songs/${saved.id}`, { transitionTypes: ["nav-forward"] });
       router.refresh();
     } catch (err) {

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { apiJson } from "@/shared/api-client";
+import { useApiJson } from "@/shared/use-api-json";
 import { formatBytes, formatDateTime, formatDuration } from "@/shared/format";
 import { Play } from "lucide-react";
 import { usePlayerStore } from "@/stores/player";
@@ -13,17 +12,10 @@ import styles from "./detail.module.scss";
 
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [song, setSong] = useState<SongDto | null>(null);
-  const [missing, setMissing] = useState(false);
+  const { data: song, error } = useApiJson<SongDto>(`/api/v1/songs/${id}`);
   const play = usePlayerStore((s) => s.play);
 
-  useEffect(() => {
-    apiJson<SongDto>(`/api/v1/songs/${id}`)
-      .then(setSong)
-      .catch(() => setMissing(true));
-  }, [id]);
-
-  if (missing) return <p>歌曲不存在。</p>;
+  if (error && !song) return <p>歌曲不存在。</p>;
   if (!song)
     return (
       <div className={styles.detail} aria-busy="true">

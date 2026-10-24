@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiJson, apiJsonBody } from "@/shared/api-client";
+import { useApiJson, clearApiCache } from "@/shared/use-api-json";
 import { formatDateTime } from "@/shared/format";
 import { SCOPES } from "@/shared/constants";
 import { confirmDialog } from "@/components/confirm";
@@ -23,7 +24,9 @@ interface ApiKeyItem {
 }
 
 export default function KeysPage() {
-  const [items, setItems] = useState<ApiKeyItem[]>([]);
+  const [rev, setRev] = useState(0);
+  const { data } = useApiJson<{ items: ApiKeyItem[] }>("/api/keys", rev);
+  const items = data?.items ?? [];
   const [name, setName] = useState("");
   const [scopes, setScopes] = useState<string[]>(["songs:read"]);
   const [rateLimit, setRateLimit] = useState("60");
@@ -31,12 +34,6 @@ export default function KeysPage() {
   const [domains, setDomains] = useState("");
   const [created, setCreated] = useState<{ name: string; key: string } | null>(null);
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    apiJson<{ items: ApiKeyItem[] }>("/api/keys")
-      .then((r) => setItems(r.items))
-      .catch((e) => toast.err(e.message));
-  }, []);
 
   // 明文 Key 模态：Escape 关闭
   useEffect(() => {
@@ -66,8 +63,8 @@ export default function KeysPage() {
       setName("");
       setExpiresAt("");
       setDomains("");
-      const r = await apiJson<{ items: ApiKeyItem[] }>("/api/keys");
-      setItems(r.items);
+      clearApiCache();
+      setRev((r) => r + 1);
     } catch (err) {
       toast.err(err instanceof Error ? err.message : "创建失败");
     } finally {
@@ -79,7 +76,7 @@ export default function KeysPage() {
     if (!(await confirmDialog({ title: `吊销「${name}」？`, message: "使用该 Key 的外部调用将立即失效。", danger: true }))) return;
     try {
       await apiJson(`/api/keys/${id}`, { method: "DELETE" });
-      setItems((prev) => prev.map((k) => (k.id === id ? { ...k, revokedAt: new Date().toISOString() } : k)));
+      setRev((r) => r + 1); // 触发重取（后台更新列表行状态）
       toast.ok("已吊销");
     } catch (e) {
       toast.err(e instanceof Error ? e.message : "吊销失败");
