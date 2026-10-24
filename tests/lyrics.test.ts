@@ -30,7 +30,7 @@ describe("parseLyricsFile", () => {
   });
 });
 
-import { songCreateSchema, uploadUrlSchema } from "../src/features/songs/schema";
+import { songCreateSchema, songMultipartPayloadSchema, uploadUrlSchema } from "../src/features/songs/schema";
 
 describe("direct upload schema", () => {
   it("接受合法直传引用", () => {
