@@ -11,7 +11,7 @@ npm run dev          # http://localhost:3000
 
 零配置即可运行：默认 SQLite（`./data/app.db`，首次访问自动迁移）+ 本地存储（`./uploads`）。
 
-首次访问会引导到 `/setup` 创建管理员（无默认口令），之后在「设置」页可切换存储后端与上传限额。
+首次访问会引导到 `/setup` 创建管理员（无默认口令），之后在「设置」页可切换存储后端与上传限额。云端部署（Vercel + Neon + Cloudflare R2）见 [docs/DEPLOY.md](docs/DEPLOY.md)。
 
 ## 功能
 

@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { requireScope } from "@/server/auth/guard";
 import { jsonError } from "@/server/http";
-import { deleteSong, getSong, updateSong, type UploadFile } from "@/features/songs/service";
+import { deleteSong, getSong, updateSong, type IncomingFile, type UploadFile } from "@/features/songs/service";
 import { songUpdateSchema } from "@/features/songs/schema";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -16,14 +16,14 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   }
 }
 
-/** 更新：JSON（仅元数据）或 multipart（payload + 可选 audio/cover 替换文件） */
+/** 更新：JSON（元数据 + 可选 audioUpload/coverUpload 直传引用）或 multipart（payload + 替换文件本体） */
 export async function PATCH(req: NextRequest, ctx: Ctx) {
   try {
     await requireScope(req, "songs:write");
     const id = (await ctx.params).id;
     const contentType = req.headers.get("content-type") ?? "";
     let patch: unknown;
-    let files: { audio?: UploadFile; cover?: UploadFile } = {};
+    let files: { audio?: IncomingFile; cover?: IncomingFile } = {};
     if (contentType.includes("multipart/form-data")) {
       const form = await req.formData();
       const payloadRaw = form.get("payload");
@@ -39,7 +39,12 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
         cover: await toUploadFile(form.get("cover")),
       };
     } else {
-      patch = await req.json();
+      const parsed = songUpdateSchema.parse(await req.json());
+      patch = parsed;
+      files = {
+        audio: parsed.audioUpload ? { refKey: parsed.audioUpload.key, name: parsed.audioUpload.name } : undefined,
+        cover: parsed.coverUpload ? { refKey: parsed.coverUpload.key, name: parsed.coverUpload.name } : undefined,
+      };
     }
     const song = await updateSong(id, songUpdateSchema.parse(patch), files);
     return NextResponse.json(song);

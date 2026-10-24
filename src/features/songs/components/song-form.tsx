@@ -1,14 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiUpload } from "@/shared/api-client";
+import { apiUpload, apiJson, apiJsonBody } from "@/shared/api-client";
 import { clearApiCache } from "@/shared/use-api-json";
 import { toast } from "@/stores/toast";
 import { EMPTY_SONG_FORM, type SongCreateInput } from "@/features/songs/schema";
 import { parseLyricsFile } from "@/features/songs/lyrics-import";
 import type { SongDto } from "@/features/songs/service";
 import styles from "./song-form.module.scss";
+
+/** 扩展名兜底 MIME 推断（浏览器 file.type 可能为空或过泛） */
+function guessMime(file: File): string {
+  if (file.type) return file.type;
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  const map: Record<string, string> = {
+    mp3: "audio/mpeg", ogg: "audio/ogg", wav: "audio/wav", flac: "audio/flac", m4a: "audio/mp4",
+    jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif", avif: "image/avif",
+  };
+  return (ext && map[ext]) || "application/octet-stream";
+}
 
 /** 表单态：所有字段均为字符串（数值/可空语义在提交时收敛） */
 type SongFormValue = Record<
@@ -55,6 +66,14 @@ export function SongForm({ song, cancelTo }: { song?: SongDto; cancelTo?: string
   const [audio, setAudio] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [stage, setStage] = useState("");
+  const [directUpload, setDirectUpload] = useState(false); // S3 后端：文件直传对象存储，绕过 Serverless 请求体上限
+
+  useEffect(() => {
+    apiJson<{ directUpload: boolean }>("/api/v1/storage-mode")
+      .then((r) => setDirectUpload(r.directUpload))
+      .catch(() => setDirectUpload(false));
+  }, []);
 
   const set = (k: keyof SongFormValue) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setV((prev) => ({ ...prev, [k]: e.target.value }));
@@ -62,6 +81,24 @@ export function SongForm({ song, cancelTo }: { song?: SongDto; cancelTo?: string
   // 非负整数字段：仅放行数字，杜绝负号/小数点/科学计数法进入表单态
   const setNum = (k: keyof SongFormValue) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setV((prev) => ({ ...prev, [k]: e.target.value.replace(/\D/g, "").slice(0, 5) }));
+
+  // 选择音频且时长为空时，用 <audio> 元数据免费回填时长（直传通道服务端不解析 ID3）
+  function onAudioChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setAudio(file);
+    if (file && !v.durationSec) {
+      const url = URL.createObjectURL(file);
+      const probe = new Audio();
+      probe.preload = "metadata";
+      probe.src = url;
+      probe.onloadedmetadata = () => {
+        if (Number.isFinite(probe.duration) && probe.duration > 0) {
+          setV((prev) => (prev.durationSec ? prev : { ...prev, durationSec: String(Math.round(probe.duration)) }));
+        }
+        URL.revokeObjectURL(url);
+      };
+    }
+  }
 
   /** 歌词文件导入：LRC/SRT/VTT 自动剥离时间轴与序号，TXT 原样导入 */
   async function importLyrics(e: React.ChangeEvent<HTMLInputElement>) {
@@ -86,19 +123,48 @@ export function SongForm({ song, cancelTo }: { song?: SongDto; cancelTo?: string
     }
   }
 
+  /** 直传：签发 URL → PUT 到对象存储 → 返回复合键引用 */
+  async function uploadDirect(kind: "audio" | "cover", file: File): Promise<{ key: string; name: string }> {
+    const mime = guessMime(file);
+    const signed = await apiJsonBody<{ url: string; key: string }>("POST", "/api/v1/songs/upload-url", {
+      kind,
+      mime,
+      filename: file.name,
+      size: file.size,
+    });
+    const res = await fetch(signed.url, { method: "PUT", body: file, headers: { "Content-Type": mime } });
+    if (!res.ok) throw new Error(`${kind === "audio" ? "音频" : "封面"}直传失败（HTTP ${res.status}）`);
+    return { key: signed.key, name: file.name.slice(0, 200) };
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
-      const saved = song
-        ? await apiUpload<SongDto>("PATCH", `/api/v1/songs/${song.id}`, toPayload(v), { audio, cover })
-        : await apiUpload<SongDto>("POST", "/api/v1/songs", toPayload(v), { audio, cover });
+      const saved = await (async () => {
+        if (directUpload && (audio || cover)) {
+          setStage("上传文件中…");
+          const [a, c] = [
+            audio ? await uploadDirect("audio", audio) : undefined,
+            cover ? await uploadDirect("cover", cover) : undefined,
+          ];
+          setStage("保存中…");
+          const body = { ...toPayload(v), ...(a && { audioUpload: a }), ...(c && { coverUpload: c }) };
+          return song
+            ? await apiJsonBody<SongDto>("PATCH", `/api/v1/songs/${song.id}`, body)
+            : await apiJsonBody<SongDto>("POST", "/api/v1/songs", body);
+        }
+        return song
+          ? await apiUpload<SongDto>("PATCH", `/api/v1/songs/${song.id}`, toPayload(v), { audio, cover })
+          : await apiUpload<SongDto>("POST", "/api/v1/songs", toPayload(v), { audio, cover });
+      })();
       toast.ok(song ? "已保存" : "已创建");
       clearApiCache();
       router.push(`/songs/${saved.id}`, { transitionTypes: ["nav-forward"] });
       router.refresh();
     } catch (err) {
       toast.err(err instanceof Error ? err.message : "保存失败");
+      setStage("");
       setBusy(false);
     }
   }
@@ -140,7 +206,7 @@ export function SongForm({ song, cancelTo }: { song?: SongDto; cancelTo?: string
             id="f-audio"
             type="file"
             accept=".mp3,.ogg,.wav,.flac,.m4a,audio/*"
-            onChange={(e) => setAudio(e.target.files?.[0] ?? null)}
+            onChange={onAudioChange}
           />
         </div>
         <div className="field">
@@ -167,7 +233,7 @@ export function SongForm({ song, cancelTo }: { song?: SongDto; cancelTo?: string
       </div>
       <div className={styles.actions}>
         <button className="btn primary" disabled={busy}>
-          {busy ? "保存中…" : song ? "保存修改" : "创建"}
+          {busy ? stage || "保存中…" : song ? "保存修改" : "创建"}
         </button>
         <button type="button" className="btn" onClick={() => router.push(backTo, { transitionTypes: ["nav-back"] })}>
           取消

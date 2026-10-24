@@ -29,3 +29,28 @@ describe("parseLyricsFile", () => {
     expect(parseLyricsFile("[00:01.00]行一\r\n[00:02.00]行二", "song.lrc")).toBe("行一\n行二");
   });
 });
+
+import { songCreateSchema, uploadUrlSchema } from "../src/features/songs/schema";
+
+describe("direct upload schema", () => {
+  it("接受合法直传引用", () => {
+    const parsed = songCreateSchema.parse({ title: "T", audioUpload: { key: "s3:audio/abcd1234.mp3", name: "song.mp3" } });
+    expect(parsed.audioUpload?.key).toBe("s3:audio/abcd1234.mp3");
+  });
+
+  it("拒绝非法键（错误驱动前缀/路径穿越）", () => {
+    expect(() => songCreateSchema.parse({ title: "T", audioUpload: { key: "local:audio/x.mp3", name: "a" } })).toThrow();
+    expect(() => songCreateSchema.parse({ title: "T", audioUpload: { key: "s3:../etc/passwd", name: "a" } })).toThrow();
+  });
+
+  it("multipart payload 不允许携带直传字段", () => {
+    expect(() =>
+      songMultipartPayloadSchema.parse({ title: "T", audioUpload: { key: "s3:audio/a.mp3", name: "a" } }),
+    ).toThrow();
+  });
+
+  it("upload-url 请求校验", () => {
+    expect(uploadUrlSchema.parse({ kind: "audio", mime: "audio/mpeg", filename: "a.mp3", size: 100 }).kind).toBe("audio");
+    expect(() => uploadUrlSchema.parse({ kind: "video", mime: "audio/mpeg", filename: "a.mp3", size: 100 })).toThrow();
+  });
+});

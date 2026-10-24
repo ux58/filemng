@@ -2,9 +2,11 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   HeadBucketCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Readable } from "node:stream";
 import type { StorageAdapter, StorageRange, StoredObject } from "./types";
 
@@ -61,6 +63,20 @@ export class S3Storage implements StorageAdapter {
 
   async test(): Promise<void> {
     await this.client.send(new HeadBucketCommand({ Bucket: this.cfg.bucket }));
+  }
+
+  async presignPut(path: string, mime: string, expiresInSec: number): Promise<string> {
+    const cmd = new PutObjectCommand({ Bucket: this.cfg.bucket, Key: path, ContentType: mime });
+    return getSignedUrl(this.client, cmd, { expiresIn: expiresInSec });
+  }
+
+  async head(path: string): Promise<{ size: number; contentType: string } | null> {
+    try {
+      const res = await this.client.send(new HeadObjectCommand({ Bucket: this.cfg.bucket, Key: path }));
+      return { size: Number(res.ContentLength ?? 0), contentType: res.ContentType ?? "" };
+    } catch {
+      return null;
+    }
   }
 }
 

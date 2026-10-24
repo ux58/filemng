@@ -4,9 +4,9 @@ import { parseBuffer } from "music-metadata";
 import { getDb, schema, type Song } from "@/server/db";
 import { ApiError } from "@/server/http";
 import { getSettings } from "@/server/settings/service";
-import { composeKey, getStorage, getStorageForKey } from "@/server/storage";
+import { composeKey, getStorage, getStorageForKey, parseStoredKey } from "@/server/storage";
 import { sniffMime } from "@/server/security/magic-bytes";
-import { ERROR_CODES } from "@/shared/constants";
+import { AUDIO_MIMES, ERROR_CODES, IMAGE_MIMES } from "@/shared/constants";
 import type { SongCreateInput, SongQuery, SongUpdateInput } from "./schema";
 
 export interface UploadFile {
@@ -14,10 +14,27 @@ export interface UploadFile {
   originalName: string;
 }
 
-const MIME_EXT: Record<string, string> = {
+/** 直传引用：客户端已通过预签名 URL 上传到存储后端的对象 */
+export interface UploadedRef {
+  refKey: string; // 复合键（s3:path）
+  name: string;
+}
+
+export type IncomingFile = UploadFile | UploadedRef;
+
+export function isUploadedRef(f: IncomingFile): f is UploadedRef {
+  return "refKey" in f;
+}
+
+export const MIME_EXT: Record<string, string> = {
   "audio/mpeg": "mp3", "audio/ogg": "ogg", "audio/wav": "wav", "audio/flac": "flac", "audio/mp4": "m4a",
   "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "image/avif": "avif",
 };
+
+/** 直传对象生成路径：audio/<random>.<ext> */
+export function uploadedObjectPath(kind: "audio" | "cover", mime: string): string {
+  return `${kind === "audio" ? "audio" : "cover"}/${randomBytes(12).toString("hex")}.${MIME_EXT[mime]}`;
+}
 
 export interface SongDto {
   id: string;
@@ -92,13 +109,22 @@ export async function getSong(id: string): Promise<SongDto> {
   return toDto(row);
 }
 
+/** 剥离直传引用字段（已折算进 files，不得入库） */
+function stripUploads<T extends object>(o: T): Omit<T, "audioUpload" | "coverUpload"> {
+  const rest: Record<string, unknown> = { ...(o as Record<string, unknown>) };
+  delete rest.audioUpload;
+  delete rest.coverUpload;
+  return rest as Omit<T, "audioUpload" | "coverUpload">;
+}
+
 export async function createSong(
   input: SongCreateInput,
-  files: { audio?: UploadFile; cover?: UploadFile },
+  files: { audio?: IncomingFile; cover?: IncomingFile },
 ): Promise<SongDto> {
-  const meta = files.audio ? await extractMetadata(files.audio.buffer).catch(() => null) : null;
+  const metaInput = stripUploads(input);
+  const meta = files.audio && !isUploadedRef(files.audio) ? await extractMetadata(files.audio.buffer).catch(() => null) : null;
   const stored = await persistFiles(files);
-  const merged = mergeAutofill(input, meta);
+  const merged = mergeAutofill(metaInput, meta);
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
   const db = await getDb();
@@ -122,15 +148,16 @@ export async function createSong(
 export async function updateSong(
   id: string,
   patch: SongUpdateInput,
-  files: { audio?: UploadFile; cover?: UploadFile },
+  files: { audio?: IncomingFile; cover?: IncomingFile },
 ): Promise<SongDto> {
   const current = await getSong(id); // 404 检查 + 旧文件键捕获
+  const metaPatch = stripUploads(patch);
   const stored = await persistFiles(files);
   const db = await getDb();
   await db
     .update(schema.songs)
     .set({
-      ...patch,
+      ...metaPatch,
       ...(stored.audio && { audioKey: stored.audio.key, audioName: stored.audio.name, audioMime: stored.audio.mime, audioSize: stored.audio.size }),
       ...(stored.cover && { coverKey: stored.cover.key, coverName: stored.cover.name, coverMime: stored.cover.mime, coverSize: stored.cover.size }),
       updatedAt: new Date().toISOString(),
@@ -163,18 +190,20 @@ async function deleteStoredObject(storedKey: string): Promise<void> {
   }
 }
 
-/** 校验大小/魔数并写入当前存储后端，返回复合键（driver:path） */
-async function persistFiles(files: { audio?: UploadFile; cover?: UploadFile }) {
+/** 校验大小/魔数并写入当前存储后端，或复核直传对象，返回复合键（driver:path） */
+async function persistFiles(files: { audio?: IncomingFile; cover?: IncomingFile }) {
   const settings = await getSettings();
   const storage = await getStorage();
-  const store = async (file: UploadFile | undefined, kind: "audio" | "image", limit: number) => {
+  const store = async (file: IncomingFile | undefined, kind: "audio" | "image", limit: number): Promise<StoredMeta | undefined> => {
     if (!file) return undefined;
-    if (file.buffer.byteLength === 0) throw new ApiError(422, ERROR_CODES.VALIDATION, `${kind === "audio" ? "音频" : "图片"}文件为空`);
+    const label = kind === "audio" ? "音频" : "图片";
+    if (isUploadedRef(file)) return resolveUploadedRef(file, kind, limit, label);
+    if (file.buffer.byteLength === 0) throw new ApiError(422, ERROR_CODES.VALIDATION, `${label}文件为空`);
     if (file.buffer.byteLength > limit) {
-      throw new ApiError(413, ERROR_CODES.PAYLOAD_TOO_LARGE, `${kind === "audio" ? "音频" : "图片"}超过大小限制`);
+      throw new ApiError(413, ERROR_CODES.PAYLOAD_TOO_LARGE, `${label}超过大小限制`);
     }
     const mime = sniffMime(file.buffer.subarray(0, 32), kind);
-    if (!mime) throw new ApiError(415, ERROR_CODES.UNSUPPORTED_MEDIA_TYPE, `${kind === "audio" ? "音频" : "图片"}格式不受支持`);
+    if (!mime) throw new ApiError(415, ERROR_CODES.UNSUPPORTED_MEDIA_TYPE, `${label}格式不受支持`);
     const path = `${kind === "audio" ? "audio" : "cover"}/${randomBytes(12).toString("hex")}.${MIME_EXT[mime]}`;
     await storage.put(path, file.buffer, mime);
     return { key: composeKey(storage.driver, path), name: file.originalName, mime, size: file.buffer.byteLength };
@@ -183,6 +212,33 @@ async function persistFiles(files: { audio?: UploadFile; cover?: UploadFile }) {
     audio: await store(files.audio, "audio", settings.upload.audioMaxBytes),
     cover: await store(files.cover, "image", settings.upload.imageMaxBytes),
   };
+}
+
+interface StoredMeta {
+  key: string;
+  name: string;
+  mime: string;
+  size: number;
+}
+
+/**
+ * 直传复核：不信任客户端声明，用 head() 取对象实际大小/类型校验。
+ * 键必须属于当前 S3 后端且位于本服务生成的 audio/ 或 cover/ 目录内。
+ */
+async function resolveUploadedRef(ref: UploadedRef, kind: "audio" | "image", limit: number, label: string): Promise<StoredMeta> {
+  const parsed = parseStoredKey(ref.refKey);
+  const allowedPrefix = kind === "audio" ? "audio/" : "cover/";
+  if (!parsed || parsed.driver !== "s3" || !parsed.path.startsWith(allowedPrefix) || parsed.path.includes("..")) {
+    throw new ApiError(422, ERROR_CODES.VALIDATION, `${label}上传键非法`);
+  }
+  const adapter = await getStorageForKey(ref.refKey);
+  if (!adapter?.head) throw new ApiError(422, ERROR_CODES.VALIDATION, "当前存储后端不支持直传对象");
+  const meta = await adapter.head(parsed.path);
+  const whitelist = kind === "audio" ? AUDIO_MIMES : IMAGE_MIMES;
+  if (!meta || meta.size === 0 || meta.size > limit || !whitelist.includes(meta.contentType as never)) {
+    throw new ApiError(415, ERROR_CODES.VALIDATION, `${label}直传对象校验失败（不存在/超限/类型不符）`);
+  }
+  return { key: ref.refKey, name: ref.name, mime: meta.contentType, size: meta.size };
 }
 
 /** music-metadata 解析音频标签，用于创建时自动回填空字段 */
